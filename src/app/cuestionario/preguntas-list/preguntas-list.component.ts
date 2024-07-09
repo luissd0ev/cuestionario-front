@@ -24,7 +24,7 @@ export class PreguntasListComponent implements OnInit {
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
-
+  pilarActualIndex: number = 0;
   constructor(private preguntaListService: PreguntaListService) {}
 
   ngOnInit(): void {
@@ -125,5 +125,21 @@ export class PreguntasListComponent implements OnInit {
     this.preguntasVisibles = this.preguntasVisibles.filter(
       (p) => p.prePreIdTrigger !== pregunta.preId
     );
+  }
+
+  irAPilarAnterior(): void {
+    if (this.pilarActualIndex > 0) {
+      this.pilarActualIndex--;
+    }
+  }
+
+  irAPilarSiguiente(): void {
+    if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
+      this.pilarActualIndex++;
+    }
+  }
+  obtenerPreguntasDelPilarActual(): Pregunta[] {
+    const pilarActual = this.valoresPonderadosPorPilar[this.pilarActualIndex];
+    return this.preguntasVisibles.filter((pregunta) => pregunta.prePilId === pilarActual.prePilId);
   }
 }
