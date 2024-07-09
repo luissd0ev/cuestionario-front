@@ -37,3 +37,31 @@
   .question-checkbox-label {
     font-size: 16px;
   }
+
+  .valores-ponderados-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Espacio entre cada elemento */
+    width: 85%;
+    margin: 0 auto; 
+  }
+  
+  .pilar-item {
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .pilar-title {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .valor-ponderado {
+    margin: 10px 0 0;
+    font-size: 16px;
+    color: #555;
+  }

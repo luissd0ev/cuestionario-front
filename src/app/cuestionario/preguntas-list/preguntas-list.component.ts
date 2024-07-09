@@ -24,7 +24,7 @@ export class PreguntasListComponent implements OnInit {
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
-  
+
   constructor(private preguntaListService: PreguntaListService) {}
 
   ngOnInit(): void {
@@ -42,41 +42,13 @@ export class PreguntasListComponent implements OnInit {
           .sort((a, b) => a.prePilId - b.prePilId)
           .filter((p) => !p.prePreIdTrigger);
 
-
         console.log('Se muestra tu array ordenado:');
         console.log(
           this.preguntas
             .sort((a, b) => a.prePilId - b.prePilId)
             .filter((p) => !p.prePreIdTrigger)
         );
-
-                // Agrupar las preguntas por prePilId
-       // Agrupar las preguntas por prePilId
-    const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntas.reduce((acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
-      const prePilId = pregunta.prePilId;
-      if (!acc[prePilId]) {
-        acc[prePilId] = [];
-      }
-      acc[prePilId].push(pregunta);
-      return acc;
-    }, {});
-   // Calcular los valores ponderados por pilar
-   for (const prePilId in preguntasPorPilar) {
-    const preguntas = preguntasPorPilar[prePilId];
-
-    const totalValorEvaluacion = preguntas.reduce((acc, pregunta) => {
-      const totalValorPregunta = pregunta.respuesta.reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-      const promedioValorPregunta = totalValorPregunta / pregunta.respuesta.length;
-      return acc + promedioValorPregunta;
-    }, 0);
-
-    const promedioPilar = totalValorEvaluacion / preguntas.length;
-    this.valoresPonderadosPorPilar.push({ prePilId: Number(prePilId), valorPonderado: promedioPilar });
-  }
-
-  console.log(this.valoresPonderadosPorPilar);
-    //////
-
+        this.calcularValoresPonderados();
       },
       error: (error) => {
         console.log('error al ejecutar la respuesta');
@@ -85,6 +57,45 @@ export class PreguntasListComponent implements OnInit {
     });
   }
 
+  calcularValoresPonderados() {
+    // Agrupar las preguntas por prePilId
+    const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntas.reduce(
+      (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
+        const prePilId = pregunta.prePilId;
+        if (!acc[prePilId]) {
+          acc[prePilId] = [];
+        }
+        acc[prePilId].push(pregunta);
+        return acc;
+      },
+      {}
+    );
+
+    // Calcular los valores ponderados por pilar
+    this.valoresPonderadosPorPilar = [];
+    for (const prePilId in preguntasPorPilar) {
+      const preguntas = preguntasPorPilar[prePilId];
+
+      const totalValorEvaluacion = preguntas.reduce((acc, pregunta) => {
+        // Solo considerar las respuestas seleccionadas
+        const totalValorPregunta = pregunta.respuesta
+          .filter((res) => res.seleccionado) // Asegúrate de tener una propiedad para identificar respuestas seleccionadas
+          .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+        const promedioValorPregunta =
+          totalValorPregunta /
+          pregunta.respuesta.filter((res) => res.seleccionado).length;
+        return acc + (isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta); // Evitar NaN si no hay respuestas seleccionadas
+      }, 0);
+
+      const promedioPilar = totalValorEvaluacion / preguntas.length;
+      this.valoresPonderadosPorPilar.push({
+        prePilId: Number(prePilId),
+        valorPonderado: promedioPilar,
+      });
+    }
+
+    console.log(this.valoresPonderadosPorPilar); // Mostrar los valores ponderados por pilar
+  }
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
     if (pregunta.preTipId === 3) {
       this.desactivarPreguntasHijas(pregunta);
@@ -96,24 +107,20 @@ export class PreguntasListComponent implements OnInit {
         p.preResIdTrigger === respuesta.resId
     );
 
-    const index = this.preguntasVisibles.findIndex(
-      (p) => p.preId === pregunta.preId
-    );
-
-    nuevasPreguntas.forEach((nuevaPregunta) => {
-      const yaVisible = this.preguntasVisibles.some(
-        (p) => p.preId === nuevaPregunta.preId
-      );
-      if (!yaVisible) {
-        if (index !== -1) {
-          this.preguntasVisibles.splice(index + 1, 0, nuevaPregunta);
-        } else {
-          this.preguntasVisibles.push(nuevaPregunta);
-        }
+    // Inserta las nuevas preguntas después de la pregunta actual
+    const index = this.preguntasVisibles.indexOf(pregunta) + 1;
+    for (const nuevaPregunta of nuevasPreguntas) {
+      if (!this.preguntasVisibles.includes(nuevaPregunta)) {
+        this.preguntasVisibles.splice(index, 0, nuevaPregunta);
       }
-    });
-  }
+    }
 
+    // Marcar la respuesta como seleccionada
+    pregunta.respuesta.forEach((res) => (res.seleccionado = res === respuesta));
+
+    // Recalcular los valores ponderados
+    this.calcularValoresPonderados();
+  }
   desactivarPreguntasHijas(pregunta: Pregunta): void {
     this.preguntasVisibles = this.preguntasVisibles.filter(
       (p) => p.prePreIdTrigger !== pregunta.preId

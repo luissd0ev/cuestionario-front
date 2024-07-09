@@ -1,7 +1,9 @@
 <h3>PREGUNTAS</h3>
-<div *ngFor="let pilar of valoresPonderadosPorPilar">
-  <h3>Pilar ID: {{ pilar.prePilId }}</h3>
-  <p>Valor Ponderado: {{ pilar.valorPonderado }}</p>
+<div class="valores-ponderados-container">
+  <div *ngFor="let pilar of valoresPonderadosPorPilar" class="pilar-item">
+    <h3 class="pilar-title">Pilar ID: {{ pilar.prePilId }}</h3>
+    <p class="valor-ponderado">Valor Ponderado: {{ pilar.valorPonderado }}</p>
+  </div>
 </div>
 <div *ngFor="let pregunta of preguntasVisibles" class="question-container">
   <div [ngSwitch]="pregunta.preTipId">
