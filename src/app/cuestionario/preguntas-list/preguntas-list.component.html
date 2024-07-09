@@ -1,0 +1,36 @@
+<div *ngFor="let pregunta of preguntasVisibles" class="question-container">
+  <div [ngSwitch]="pregunta.preTipId">
+    <!-- Pregunta abierta -->
+    <div *ngSwitchCase="3">
+      <label class="question-label">{{ pregunta.prePregunta }}</label>
+      <input type="text" class="question-input" />
+    </div>
+
+    <!-- Selección única -->
+    <div *ngSwitchCase="4">
+      <label class="question-label">{{ pregunta.prePregunta }}</label>
+      <div *ngFor="let respuesta of pregunta.respuesta">
+        <input
+          type="radio"
+          [name]="pregunta.preId"
+          class="question-radio"
+          (change)="onRespuestaSeleccionada(pregunta, respuesta)"
+        />
+        <label class="question-radio-label">{{ respuesta.resValor }}</label>
+      </div>
+    </div>
+
+    <!-- Selección múltiple -->
+    <div *ngSwitchCase="5">
+      <label class="question-label">{{ pregunta.prePregunta }}</label>
+      <div *ngFor="let respuesta of pregunta.respuesta">
+        <input
+          type="checkbox"
+          class="question-checkbox"
+          (change)="onRespuestaSeleccionada(pregunta, respuesta)"
+        />
+        <label class="question-checkbox-label">{{ respuesta.resValor }}</label>
+      </div>
+    </div>
+  </div>
+</div>
