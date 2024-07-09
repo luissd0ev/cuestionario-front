@@ -60,6 +60,7 @@ export class PreguntasListComponent implements OnInit {
       (p) => p.preId === pregunta.preId
     );
 
+    
     // Insertar las nuevas preguntas después de la pregunta actual si no están ya presentes
     nuevasPreguntas.forEach((nuevaPregunta) => {
       const yaVisible = this.preguntasVisibles.some(
@@ -74,6 +75,8 @@ export class PreguntasListComponent implements OnInit {
         }
       }
     });
+
+
   }
 
   private desactivarPreguntasHijas(pregunta: Pregunta): void {
