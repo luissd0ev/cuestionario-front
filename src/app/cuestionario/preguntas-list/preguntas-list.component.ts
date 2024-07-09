@@ -15,6 +15,9 @@ import { Pregunta, Respuesta } from './preguntas-list.interface';
   ////Se podrían definir estilos de la siguiente maner
   styleUrl: './preguntas-list.component.css',
 })
+
+
+
 export class PreguntasListComponent implements OnInit {
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
@@ -25,7 +28,7 @@ export class PreguntasListComponent implements OnInit {
     console.log('Implementando método OnInit');
     this.searchPreguntas();
   }
-
+  
   searchPreguntas() {
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
@@ -43,43 +46,48 @@ export class PreguntasListComponent implements OnInit {
     });
   }
 
-  onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
-    if (pregunta.preTipId === 3) {
-      this.desactivarPreguntasHijas(pregunta);
-    }
 
-    // Filtrar las nuevas preguntas basadas en la respuesta seleccionada
-    const nuevasPreguntas = this.preguntas.filter(
-      (p) =>
-        p.prePreIdTrigger === pregunta.preId &&
-        p.preResIdTrigger === respuesta.resId
-    );
 
-    // Encontrar el índice de la pregunta actual en la lista de preguntas visibles
-    const index = this.preguntasVisibles.findIndex(
-      (p) => p.preId === pregunta.preId
-    );
-
-    
-    // Insertar las nuevas preguntas después de la pregunta actual si no están ya presentes
-    nuevasPreguntas.forEach((nuevaPregunta) => {
-      const yaVisible = this.preguntasVisibles.some(
-        (p) => p.preId === nuevaPregunta.preId
-      );
-      if (!yaVisible) {
-        if (index !== -1) {
-          this.preguntasVisibles.splice(index + 1, 0, nuevaPregunta);
-        } else {
-          // Si la pregunta actual no se encuentra (lo cual no debería ocurrir), simplemente agregar al final
-          this.preguntasVisibles.push(nuevaPregunta);
-        }
+  agruparPreguntasPorPilar() {
+    const preguntasAgrupadas = this.preguntas.reduce((acc: any, pregunta) => {
+      const { prePilId } = pregunta;
+      if (!acc[prePilId]) {
+        acc[prePilId] = [];
       }
-    });
+      acc[prePilId].push(pregunta);
+      return acc;
+    }, {});
 
-
+    this.preguntasVisibles = preguntasAgrupadas;
   }
 
-  private desactivarPreguntasHijas(pregunta: Pregunta): void {
+  onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
+    if (pregunta.preTipId === 3) {
+        this.desactivarPreguntasHijas(pregunta);
+    }
+
+    const nuevasPreguntas = this.preguntas.filter(
+        (p) =>
+            p.prePreIdTrigger === pregunta.preId &&
+            p.preResIdTrigger === respuesta.resId
+    );
+
+    const index = this.preguntasVisibles.findIndex(p => p.preId === pregunta.preId);
+
+    nuevasPreguntas.forEach(nuevaPregunta => {
+        const yaVisible = this.preguntasVisibles.some(p => p.preId === nuevaPregunta.preId);
+        if (!yaVisible) {
+            if (index !== -1) {
+                this.preguntasVisibles.splice(index + 1, 0, nuevaPregunta);
+            } else {
+                this.preguntasVisibles.push(nuevaPregunta);
+            }
+        }
+    });
+  }
+
+
+   desactivarPreguntasHijas(pregunta: Pregunta): void {
     this.preguntasVisibles = this.preguntasVisibles.filter(
       (p) => p.prePreIdTrigger !== pregunta.preId
     );

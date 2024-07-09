@@ -11,5 +11,6 @@ export interface Pregunta {
   preTipId: number;
   prePreIdTrigger: number;
   preResIdTrigger: number;
+  prePilId: number; 
   respuesta: Respuesta[];
 }
