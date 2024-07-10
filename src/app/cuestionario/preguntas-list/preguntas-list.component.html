@@ -1,57 +1,69 @@
-<h3>PREGUNTAS</h3>
-<div class="valores-ponderados-container">
-  <div *ngFor="let pilar of valoresPonderadosPorPilar" class="pilar-item">
-    <h3 class="pilar-title">Pilar ID: {{ pilar.prePilId }}</h3>
-    <p class="valor-ponderado">Valor Ponderado: {{ pilar.valorPonderado }}</p>
-  </div>
-</div>
-<div class="preguntas-list-container">
-  <div *ngFor="let pregunta of obtenerPreguntasDelPilarActual()" class="question-container">
-    <div [ngSwitch]="pregunta.preTipId">
-      <!-- Pregunta abierta -->
-      <div *ngSwitchCase="3">
-        <label class="question-label">{{ pregunta.prePregunta }}</label>
-        <input type="text" class="question-input" />
-      </div>
-
-      <!-- Selección única -->
-      <div *ngSwitchCase="4">
-        <label class="question-label">{{ pregunta.prePregunta }}</label>
-        <div *ngFor="let respuesta of pregunta.respuesta">
-          <input
-            type="radio"
-            [name]="pregunta.preId"
-            class="question-radio"
-            (change)="onRespuestaSeleccionada(pregunta, respuesta)"
-          />
-          <label class="question-radio-label">{{ respuesta.resValor }}</label>
+<div class="box-container">
+  <h3 class="preguntas-title">PREGUNTAS</h3>
+  <h4>Pilar {{ pilarActualIndex + 1 }}</h4>
+  <div class="preguntas-list-container">
+    <div
+      *ngFor="let pregunta of obtenerPreguntasDelPilarActual()"
+      class="question-container"
+    >
+      <div [ngSwitch]="pregunta.preTipId">
+        <!-- Pregunta abierta -->
+        <div *ngSwitchCase="3">
+          <label class="question-label">{{ pregunta.prePregunta }}</label>
+          <input type="text" class="question-input" />
         </div>
-      </div>
 
-      <!-- Selección múltiple -->
-      <div *ngSwitchCase="5">
-        <label class="question-label">{{ pregunta.prePregunta }}</label>
-        <div *ngFor="let respuesta of pregunta.respuesta">
-          <input
-            type="checkbox"
-            class="question-checkbox"
-            (change)="onRespuestaSeleccionada(pregunta, respuesta)"
-          />
-          <label class="question-checkbox-label">{{ respuesta.resValor }}</label>
+        <!-- Selección única -->
+        <div *ngSwitchCase="4">
+          <label class="question-label">{{ pregunta.prePregunta }}</label>
+          <div *ngFor="let respuesta of pregunta.respuesta">
+            <input
+              type="radio"
+              [name]="pregunta.preId"
+              class="question-radio"
+              (change)="onRespuestaSeleccionada(pregunta, respuesta)"
+            />
+            <label class="question-radio-label"
+              >{{ respuesta.resValor }} a:
+              {{ respuesta.resValorEvaluacion }}</label
+            >
+          </div>
+        </div>
+
+        <!-- Selección múltiple -->
+        <div *ngSwitchCase="5">
+          <label class="question-label">{{ pregunta.prePregunta }}</label>
+          <div *ngFor="let respuesta of pregunta.respuesta">
+            <input
+              type="checkbox"
+              class="question-checkbox"
+              (change)="onRespuestaSeleccionada(pregunta, respuesta)"
+            />
+            <label class="question-checkbox-label"
+              >{{ respuesta.resValor }} a:
+              {{ respuesta.resValorEvaluacion }}</label
+            >
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="nav-buttons">
+      <button class="nav-button" (click)="irAPilarAnterior()">Anterior</button>
+      <button class="nav-button" (click)="irAPilarSiguiente()">
+        Siguiente
+      </button>
+    </div>
   </div>
 
-  <div class="nav-buttons">
-    <button class="nav-button" (click)="irAPilarAnterior()">Anterior</button>
-    <button class="nav-button" (click)="irAPilarSiguiente()">Siguiente</button>
-  </div>
-
-  <div class="resultados-ponderacion">
+  <div class="valores-ponderados-container">
     <div *ngFor="let pilar of valoresPonderadosPorPilar">
-      <h3>Pilar ID: {{ pilar.prePilId }}</h3>
-      <p>Valor Ponderado: {{ pilar.valorPonderado }}</p>
+      <ng-container *ngIf="pilar.prePilId === pilarActualIndex + 1" >
+        <!-- <h3 class="pilar-title">Pilar ID: {{ pilar.prePilId }}</h3> -->
+        <p class="valor-ponderado">
+          Valor Ponderado: {{ pilar.valorPonderado }}
+        </p>
+      </ng-container>
     </div>
   </div>
 </div>

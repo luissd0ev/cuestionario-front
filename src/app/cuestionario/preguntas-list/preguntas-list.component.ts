@@ -20,41 +20,20 @@ interface ValorPonderadoPorPilar {
   ////Se podrían definir estilos de la siguiente maner
   styleUrl: './preguntas-list.component.css',
 })
+
+
 export class PreguntasListComponent implements OnInit {
+
+  
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
+
   constructor(private preguntaListService: PreguntaListService) {}
 
   ngOnInit(): void {
-    console.log('Implementando método OnInit');
     this.searchPreguntas();
-  }
-
-  searchPreguntas() {
-    this.preguntaListService.searchPreguntas().subscribe({
-      next: (response) => {
-        console.log('Se muestra el resultado de las preguntas');
-        console.log(response);
-        this.preguntas = response;
-        this.preguntasVisibles = this.preguntas
-          .sort((a, b) => a.prePilId - b.prePilId)
-          .filter((p) => !p.prePreIdTrigger);
-
-        console.log('Se muestra tu array ordenado:');
-        console.log(
-          this.preguntas
-            .sort((a, b) => a.prePilId - b.prePilId)
-            .filter((p) => !p.prePreIdTrigger)
-        );
-        this.calcularValoresPonderados();
-      },
-      error: (error) => {
-        console.log('error al ejecutar la respuesta');
-        console.log(error);
-      },
-    });
   }
 
   calcularValoresPonderados() {
@@ -96,6 +75,25 @@ export class PreguntasListComponent implements OnInit {
 
     console.log(this.valoresPonderadosPorPilar); // Mostrar los valores ponderados por pilar
   }
+
+  desactivarPreguntasHijas(pregunta: Pregunta): void {
+    this.preguntasVisibles = this.preguntasVisibles.filter(
+      (p) => p.prePreIdTrigger !== pregunta.preId
+    );
+  }
+
+  irAPilarAnterior(): void {
+    if (this.pilarActualIndex > 0) {
+      this.pilarActualIndex--;
+    }
+  }
+
+  irAPilarSiguiente(): void {
+    if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
+      this.pilarActualIndex++;
+    }
+  }
+
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
     if (pregunta.preTipId === 3) {
       this.desactivarPreguntasHijas(pregunta);
@@ -121,25 +119,36 @@ export class PreguntasListComponent implements OnInit {
     // Recalcular los valores ponderados
     this.calcularValoresPonderados();
   }
-  desactivarPreguntasHijas(pregunta: Pregunta): void {
-    this.preguntasVisibles = this.preguntasVisibles.filter(
-      (p) => p.prePreIdTrigger !== pregunta.preId
+
+  obtenerPreguntasDelPilarActual(): Pregunta[] {
+    const pilarActual = this.valoresPonderadosPorPilar[this.pilarActualIndex];
+    return this.preguntasVisibles.filter(
+      (pregunta) => pregunta.prePilId === pilarActual.prePilId
     );
   }
 
-  irAPilarAnterior(): void {
-    if (this.pilarActualIndex > 0) {
-      this.pilarActualIndex--;
-    }
-  }
+  searchPreguntas() {
+    this.preguntaListService.searchPreguntas().subscribe({
+      next: (response) => {
+        console.log('Se muestra el resultado de las preguntas');
+        console.log(response);
+        this.preguntas = response;
+        this.preguntasVisibles = this.preguntas
+          .sort((a, b) => a.prePilId - b.prePilId)
+          .filter((p) => !p.prePreIdTrigger);
 
-  irAPilarSiguiente(): void {
-    if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
-      this.pilarActualIndex++;
-    }
-  }
-  obtenerPreguntasDelPilarActual(): Pregunta[] {
-    const pilarActual = this.valoresPonderadosPorPilar[this.pilarActualIndex];
-    return this.preguntasVisibles.filter((pregunta) => pregunta.prePilId === pilarActual.prePilId);
+        console.log('Se muestra tu array ordenado:');
+        console.log(
+          this.preguntas
+            .sort((a, b) => a.prePilId - b.prePilId)
+            .filter((p) => !p.prePreIdTrigger)
+        );
+        this.calcularValoresPonderados();
+      },
+      error: (error) => {
+        console.log('error al ejecutar la respuesta');
+        console.log(error);
+      },
+    });
   }
 }
