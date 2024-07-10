@@ -20,11 +20,7 @@ interface ValorPonderadoPorPilar {
   ////Se podrían definir estilos de la siguiente maner
   styleUrl: './preguntas-list.component.css',
 })
-
-
 export class PreguntasListComponent implements OnInit {
-
-  
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
