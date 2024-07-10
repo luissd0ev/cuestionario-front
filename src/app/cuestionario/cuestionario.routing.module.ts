@@ -1,6 +1,7 @@
 import { RouterModule } from "@angular/router";
 import { NgModule } from "@angular/core";
 import { PreguntasListComponent } from "./preguntas-list/preguntas-list.component";
+import { ResultComponent } from "./results/result.component";
 
 
 export const TIPO_DISPOSITIVO_ROUTES = [
@@ -10,10 +11,10 @@ export const TIPO_DISPOSITIVO_ROUTES = [
             component: PreguntasListComponent
         },
         ///PASAR ARGUMENTO ID, paso componente
-        // {
-        //     path: 'id',
-        //     component: TipoDispositivoEditComponent
-        // }
+        {
+            path: 'result',
+            component: ResultComponent
+        }
     ];
     
     @NgModule({

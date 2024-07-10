@@ -1,0 +1,33 @@
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+<h2>En este componente se muestran los resultados</h2>
+
+<div class="result-container">
+    <h3>Resultados</h3>
+    
+    <div *ngFor="let pilar of valoresPonderadosPorPilar" class="pilar-item">
+      <h4>Pilar ID: {{ pilar.prePilId }}</h4>
+      <p>Valor Ponderado: {{ pilar.valorPonderado }}</p>
+    </div>
+  
+    <div *ngFor="let pregunta of preguntasVisibles" class="pregunta-item">
+      <h4>Pregunta: {{ pregunta.prePregunta }}</h4>
+      <ul>
+        <li *ngFor="let respuesta of pregunta.respuesta">
+          {{ respuesta.resDescripcion }} - Seleccionado: {{ respuesta.seleccionado ? 'Sí' : 'No' }}
+        </li>
+      </ul>
+    </div>
+  </div>

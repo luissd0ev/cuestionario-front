@@ -1,11 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { Subscription } from 'rxjs';
-import { ToastrService } from 'ngx-toastr';
-import { Router } from '@angular/router';
 import { PreguntaListService } from './preguntas-list.service';
 import { Pregunta, Respuesta } from './preguntas-list.interface';
 
@@ -17,9 +10,10 @@ interface ValorPonderadoPorPilar {
 @Component({
   selector: 'preguntas-list',
   templateUrl: 'preguntas-list.component.html',
-  ////Se podrían definir estilos de la siguiente maner
-  styleUrl: './preguntas-list.component.css',
+  styleUrls: ['./preguntas-list.component.css'],
 })
+
+
 export class PreguntasListComponent implements OnInit {
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
@@ -29,11 +23,11 @@ export class PreguntasListComponent implements OnInit {
   constructor(private preguntaListService: PreguntaListService) {}
 
   ngOnInit(): void {
+    this.loadStateFromLocalStorage();
     this.searchPreguntas();
   }
 
   calcularValoresPonderados() {
-    // Agrupar las preguntas por prePilId
     const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntas.reduce(
       (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
         const prePilId = pregunta.prePilId;
@@ -46,20 +40,18 @@ export class PreguntasListComponent implements OnInit {
       {}
     );
 
-    // Calcular los valores ponderados por pilar
     this.valoresPonderadosPorPilar = [];
     for (const prePilId in preguntasPorPilar) {
       const preguntas = preguntasPorPilar[prePilId];
 
       const totalValorEvaluacion = preguntas.reduce((acc, pregunta) => {
-        // Solo considerar las respuestas seleccionadas
         const totalValorPregunta = pregunta.respuesta
-          .filter((res) => res.seleccionado) // Asegúrate de tener una propiedad para identificar respuestas seleccionadas
+          .filter((res) => res.seleccionado)
           .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
         const promedioValorPregunta =
           totalValorPregunta /
           pregunta.respuesta.filter((res) => res.seleccionado).length;
-        return acc + (isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta); // Evitar NaN si no hay respuestas seleccionadas
+        return acc + (isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta);
       }, 0);
 
       const promedioPilar = totalValorEvaluacion / preguntas.length;
@@ -69,7 +61,29 @@ export class PreguntasListComponent implements OnInit {
       });
     }
 
-    console.log(this.valoresPonderadosPorPilar); // Mostrar los valores ponderados por pilar
+    this.saveStateToLocalStorage();
+    console.log(this.valoresPonderadosPorPilar);
+  }
+
+  saveStateToLocalStorage() {
+    const state = {
+      preguntas: this.preguntas,
+      preguntasVisibles: this.preguntasVisibles,
+      valoresPonderadosPorPilar: this.valoresPonderadosPorPilar,
+      pilarActualIndex: this.pilarActualIndex,
+    };
+    localStorage.setItem('preguntasState', JSON.stringify(state));
+  }
+
+  loadStateFromLocalStorage() {
+    const savedState = localStorage.getItem('preguntasState');
+    if (savedState) {
+      const state = JSON.parse(savedState);
+      this.preguntas = state.preguntas || [];
+      this.preguntasVisibles = state.preguntasVisibles || [];
+      this.valoresPonderadosPorPilar = state.valoresPonderadosPorPilar || [];
+      this.pilarActualIndex = state.pilarActualIndex || 0;
+    }
   }
 
   desactivarPreguntasHijas(pregunta: Pregunta): void {
@@ -81,12 +95,14 @@ export class PreguntasListComponent implements OnInit {
   irAPilarAnterior(): void {
     if (this.pilarActualIndex > 0) {
       this.pilarActualIndex--;
+      this.saveStateToLocalStorage();
     }
   }
 
   irAPilarSiguiente(): void {
     if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
       this.pilarActualIndex++;
+      this.saveStateToLocalStorage();
     }
   }
 
@@ -101,7 +117,6 @@ export class PreguntasListComponent implements OnInit {
         p.preResIdTrigger === respuesta.resId
     );
 
-    // Inserta las nuevas preguntas después de la pregunta actual
     const index = this.preguntasVisibles.indexOf(pregunta) + 1;
     for (const nuevaPregunta of nuevasPreguntas) {
       if (!this.preguntasVisibles.includes(nuevaPregunta)) {
@@ -109,10 +124,8 @@ export class PreguntasListComponent implements OnInit {
       }
     }
 
-    // Marcar la respuesta como seleccionada
     pregunta.respuesta.forEach((res) => (res.seleccionado = res === respuesta));
 
-    // Recalcular los valores ponderados
     this.calcularValoresPonderados();
   }
 
