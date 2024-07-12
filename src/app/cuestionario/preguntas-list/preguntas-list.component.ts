@@ -28,6 +28,7 @@ export class PreguntasListComponent implements OnInit {
   }
 
   calcularValoresPonderados() {
+
     const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntas.reduce(
       (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
         const prePilId = pregunta.prePilId;
@@ -118,6 +119,7 @@ export class PreguntasListComponent implements OnInit {
     );
 
     const index = this.preguntasVisibles.indexOf(pregunta) + 1;
+
     for (const nuevaPregunta of nuevasPreguntas) {
       if (!this.preguntasVisibles.includes(nuevaPregunta)) {
         this.preguntasVisibles.splice(index, 0, nuevaPregunta);
@@ -127,6 +129,12 @@ export class PreguntasListComponent implements OnInit {
     pregunta.respuesta.forEach((res) => (res.seleccionado = res === respuesta));
 
     this.calcularValoresPonderados();
+  }
+  
+  onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    pregunta.respuesta[0].resValor = inputElement.value; // Asume que solo hay una respuesta asociada con el campo de texto
+    this.calcularValoresPonderados(); // Recalcula los valores ponderados si es necesario
   }
 
   obtenerPreguntasDelPilarActual(): Pregunta[] {

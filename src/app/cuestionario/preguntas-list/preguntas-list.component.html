@@ -10,7 +10,12 @@
         <!-- Pregunta abierta -->
         <div *ngSwitchCase="3">
           <label class="question-label">{{ pregunta.prePregunta }}</label>
-          <input type="text" class="question-input" />
+          <input
+            type="text"
+            class="question-input"
+            (input)="onRespuestaTextoCambiado(pregunta, $event)"
+            [(ngModel)]="pregunta.respuesta[0].resValor"
+          />
         </div>
 
         <!-- Selección única -->
@@ -21,6 +26,7 @@
               type="radio"
               [name]="pregunta.preId"
               class="question-radio"
+              [checked]="respuesta.seleccionado"
               (change)="onRespuestaSeleccionada(pregunta, respuesta)"
             />
             <label class="question-radio-label"
@@ -58,7 +64,7 @@
 
   <div class="valores-ponderados-container">
     <div *ngFor="let pilar of valoresPonderadosPorPilar">
-      <ng-container *ngIf="pilar.prePilId === pilarActualIndex + 1" >
+      <ng-container *ngIf="pilar.prePilId === pilarActualIndex + 1">
         <!-- <h3 class="pilar-title">Pilar ID: {{ pilar.prePilId }}</h3> -->
         <p class="valor-ponderado">
           Valor Ponderado: {{ pilar.valorPonderado }}
