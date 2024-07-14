@@ -13,7 +13,7 @@ export class PreguntaListService {
   constructor(private http: HttpClient) {}
 
   searchPreguntas(): Observable<Pregunta[]>{
-    const apiUrl = `${this.url}/Allquestions`;
+    const apiUrl = `${this.url}/Allquestionss`;
     return this.http.get<Pregunta[]>(apiUrl, {headers: headers}); 
   } 
 

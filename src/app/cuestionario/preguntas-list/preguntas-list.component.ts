@@ -145,6 +145,7 @@ export class PreguntasListComponent implements OnInit {
   }
 
   searchPreguntas() {
+    console.log("PREGUNTAS:"); 
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
