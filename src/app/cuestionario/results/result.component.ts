@@ -18,38 +18,45 @@ export class ResultComponent implements OnInit {
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
-  constructor(private preguntaListService: PreguntaListService,private router: Router) {}
-  calcularValorPonderado(pregunta: Pregunta): number {
-    const totalValorEvaluacion = pregunta.respuesta
-      .filter(res => res.seleccionado)
-      .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-    const promedioValorPregunta = totalValorEvaluacion / pregunta.respuesta.filter(res => res.seleccionado).length;
-    return isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta;
-  }
-  volver() {
-    this.router.navigate(['/preguntas']);
-  }
 
+  constructor(
+    private preguntaListService: PreguntaListService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.searchPreguntas();
   }
 
+  calcularValorPonderado(pregunta: Pregunta): number {
+    const totalValorEvaluacion = pregunta.respuesta
+      .filter((res) => res.seleccionado)
+      .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+    const promedioValorPregunta =
+      totalValorEvaluacion /
+      pregunta.respuesta.filter((res) => res.seleccionado).length;
+    return isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta;
+  }
 
   searchPreguntas() {
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
-        this.preguntas = response.map(pregunta => {
+        this.preguntas = response.map((pregunta) => {
           return {
             ...pregunta,
-            contestaciones: pregunta.contestaciones.length > 0 ? pregunta.contestaciones : [{
-              corId: 0,
-              corResId: 0,
-              corPreId: pregunta.preId,
-              corValor: '',
-              corImagen: '',
-              corNoContesto: false
-            }]
+            contestaciones:
+              pregunta.contestaciones.length > 0
+                ? pregunta.contestaciones
+                : [
+                    {
+                      corId: 0,
+                      corResId: 0,
+                      corPreId: pregunta.preId,
+                      corValor: '',
+                      corImagen: '',
+                      corNoContesto: false,
+                    },
+                  ],
           };
         });
 
@@ -70,14 +77,16 @@ export class ResultComponent implements OnInit {
           });
         });
 
-        console.log("Valor de preguntas: ");
-        console.log(this.preguntas); 
+      
       },
       error: (error) => {
-        console.log('error al ejecutar la respuesta');
-        console.log(error);
-      }
+  
+      },
     });
+  }
+
+  volver() {
+    this.router.navigate(['/preguntas']);
   }
 
 }

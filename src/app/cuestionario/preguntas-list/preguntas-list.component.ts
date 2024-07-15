@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PreguntaListService } from './preguntas-list.service';
 import { Pregunta, Respuesta } from './preguntas-list.interface';
-import {ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface ValorPonderadoPorPilar {
   prePilId: number;
@@ -14,13 +14,15 @@ interface ValorPonderadoPorPilar {
   styleUrls: ['./preguntas-list.component.css'],
 })
 export class PreguntasListComponent implements OnInit {
-
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
 
-  constructor(private preguntaListService: PreguntaListService, private router: Router) {}
+  constructor(
+    private preguntaListService: PreguntaListService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadStateFromLocalStorage();
@@ -65,14 +67,54 @@ export class PreguntasListComponent implements OnInit {
     console.log(this.valoresPonderadosPorPilar);
   }
 
-  saveStateToLocalStorage() {
-    const state = {
-      preguntas: this.preguntas,
-      preguntasVisibles: this.preguntasVisibles,
-      valoresPonderadosPorPilar: this.valoresPonderadosPorPilar,
-      pilarActualIndex: this.pilarActualIndex,
-    };
-    localStorage.setItem('preguntasState', JSON.stringify(state));
+  desactivarPreguntasHijas(pregunta: Pregunta): void {
+    this.preguntasVisibles = this.preguntasVisibles.filter(
+      (p) => p.prePreIdTrigger !== pregunta.preId
+    );
+  }
+
+  direccionar() {
+    this.router.navigate(['/preguntas/result']);
+  }
+
+  guardar() {
+    console.log('GUARDANDO');
+    const preguntasFiltro = this.preguntasVisibles.map((pregunta) => {
+      return {
+        ...pregunta,
+        contestaciones: pregunta.contestaciones.filter((contestacion) => {
+          return contestacion.corResId != 0;
+        }),
+      };
+    });
+    this.preguntaListService.saveUpdateQuestions(preguntasFiltro).subscribe({
+      next: (result) => {
+        console.log('Datos guardados con exito.');
+        // alert("Datos guardados con éxito.");
+      },
+      error: (error) => {
+        console.log('Error en la operación.');
+        // alert("error en la operación.");
+      },
+    });
+  }
+
+  irAPilarAnterior(): void {
+    if (this.pilarActualIndex > 0) {
+      this.pilarActualIndex--;
+      this.guardar();
+      this.saveStateToLocalStorage();
+      this.searchPreguntas();
+    }
+  }
+
+  irAPilarSiguiente(): void {
+    if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
+      this.pilarActualIndex++;
+      this.guardar();
+      this.saveStateToLocalStorage();
+      this.searchPreguntas();
+    }
   }
 
   loadStateFromLocalStorage() {
@@ -86,58 +128,10 @@ export class PreguntasListComponent implements OnInit {
     }
   }
 
-  desactivarPreguntasHijas(pregunta: Pregunta): void {
-    this.preguntasVisibles = this.preguntasVisibles.filter(
-      (p) => p.prePreIdTrigger !== pregunta.preId
-    );
-  }
-
-  irAPilarAnterior(): void {
-    if (this.pilarActualIndex > 0) {
-      this.pilarActualIndex--;
-      this.guardar(); 
-      this.saveStateToLocalStorage();
-      this.searchPreguntas();
-    }
-  }
-
-  irAPilarSiguiente(): void {
-    if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
-      this.pilarActualIndex++;
-      this.guardar(); 
-      this.saveStateToLocalStorage();
-      this.searchPreguntas();
-    }
-  }
-
-
-  direccionar() {
-
-  this.router.navigate(['/preguntas/result']); 
-  }
-  guardar() {
-    console.log('GUARDANDO');
-    const preguntasFiltro = this.preguntasVisibles.map(pregunta=>{
-        return {
-          ...pregunta,
-          contestaciones: pregunta.contestaciones.filter(contestacion=>{
-            return contestacion.corResId != 0; 
-          })
-        }
-    })
-    this.preguntaListService.saveUpdateQuestions(preguntasFiltro).subscribe({
-      next: result=>{
-        console.log("Datos guardados con exito."); 
-        // alert("Datos guardados con éxito.");
-      },  
-      error: error=>{
-        console.log("Error en la operación.");
-        // alert("error en la operación."); 
-      }
-    })
-  }
-
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
+    
+    const getCorId = pregunta.contestaciones[0].corId ?? 0;
+        
     if (pregunta.preTipId === 3) {
       this.desactivarPreguntasHijas(pregunta);
     }
@@ -161,21 +155,24 @@ export class PreguntasListComponent implements OnInit {
     pregunta.contestaciones = pregunta.contestaciones.filter(
       (cont) => cont.corPreId !== pregunta.preId
     );
+
     pregunta.contestaciones.push({
-      corId: 0, // Asigna un ID si es necesario
+      corId: getCorId, // Asigna un ID si es necesario
       corResId: respuesta.resId,
       corPreId: pregunta.preId,
       corValor: respuesta.resValor,
       corImagen: '', // Asigna una imagen si es necesario
       corNoContesto: false,
     });
+
+
     this.preguntas.map((pregunta) => {
       return {
         ...pregunta,
         contestaciones: [
           ...pregunta.contestaciones,
           {
-            corId: 0, // Asigna un ID si es necesario
+            corId: getCorId, // Asigna un ID si es necesario
             corResId: respuesta.resId,
             corPreId: pregunta.preId,
             corValor: respuesta.resValor,
@@ -185,21 +182,15 @@ export class PreguntasListComponent implements OnInit {
         ],
       };
     });
-    console.log('VALOR DE CONTESTACIONES ');
-    console.log(pregunta.contestaciones);
-
-    console.log('Valor de preguntas:');
-    console.log(this.preguntas);
-
+   
     this.calcularValoresPonderados();
   }
 
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    // pregunta.respuesta[0].resValor = inputElement.value;
+   
     const getCorId = pregunta.contestaciones[0].corId ?? 0;
-    console.log("EL VAOR DE CORID ES: ");
-    console.log(getCorId); 
+
     pregunta.contestaciones[0] = {
       corId: getCorId,
       corResId: 1,
@@ -208,12 +199,9 @@ export class PreguntasListComponent implements OnInit {
       corImagen: '',
       corNoContesto: false,
     };
-    console.log('WRITTING');
-
-    console.log('Valor de preguntas:');
-    console.log(this.preguntas);
-
-    this.calcularValoresPonderados(); // Recalcula los valores ponderados si es necesario
+  
+    this.calcularValoresPonderados(); 
+  
   }
 
   obtenerPreguntasDelPilarActual(): Pregunta[] {
@@ -223,25 +211,42 @@ export class PreguntasListComponent implements OnInit {
     );
   }
 
+  saveStateToLocalStorage() {
+    const state = {
+      preguntas: this.preguntas,
+      preguntasVisibles: this.preguntasVisibles,
+      valoresPonderadosPorPilar: this.valoresPonderadosPorPilar,
+      pilarActualIndex: this.pilarActualIndex,
+    };
+
+    localStorage.setItem('preguntasState', JSON.stringify(state));
+  }
+
   searchPreguntas() {
+
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
         console.log(response);
-        this.preguntas = response.map(pregunta => {
+        this.preguntas = response.map((pregunta) => {
           return {
             ...pregunta,
-            contestaciones: pregunta.contestaciones.length > 0 ? pregunta.contestaciones : [{
-              corId: 0,
-              corResId: 0, // Ajusta esto según sea necesario
-              corPreId: pregunta.preId,
-              corValor: '',
-              corImagen: '',
-              corNoContesto: false
-            }]
+            contestaciones:
+              pregunta.contestaciones.length > 0
+                ? pregunta.contestaciones
+                : [
+                    {
+                      corId: 0,
+                      corResId: 0, // Ajusta esto según sea necesario
+                      corPreId: pregunta.preId,
+                      corValor: '',
+                      corImagen: '',
+                      corNoContesto: false,
+                    },
+                  ],
           };
         });
-    
+
         this.preguntas.forEach((pregunta) => {
           pregunta.respuesta.forEach((res) => {
             res.seleccionado = pregunta.contestaciones.some(
@@ -277,5 +282,7 @@ export class PreguntasListComponent implements OnInit {
         console.log(error);
       },
     });
+  
   }
+
 }
