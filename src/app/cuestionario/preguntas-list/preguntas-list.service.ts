@@ -16,5 +16,5 @@ export class PreguntaListService {
     const apiUrl = `${this.url}/Allquestionss`;
     return this.http.get<Pregunta[]>(apiUrl, {headers: headers}); 
   } 
-
+  
 }

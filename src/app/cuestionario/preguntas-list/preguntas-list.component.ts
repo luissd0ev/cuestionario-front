@@ -104,6 +104,10 @@ export class PreguntasListComponent implements OnInit {
     }
   }
 
+  guardar() {
+    console.log('GUARDANDO');
+  }
+
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
     if (pregunta.preTipId === 3) {
       this.desactivarPreguntasHijas(pregunta);
@@ -136,9 +140,9 @@ export class PreguntasListComponent implements OnInit {
       corImagen: '', // Asigna una imagen si es necesario
       corNoContesto: false,
     });
-    this.preguntas.map((pregunta)=>{
+    this.preguntas.map((pregunta) => {
       return {
-        ...pregunta, 
+        ...pregunta,
         contestaciones: [
           ...pregunta.contestaciones,
           {
@@ -148,52 +152,35 @@ export class PreguntasListComponent implements OnInit {
             corValor: respuesta.resValor,
             corImagen: '', // Asigna una imagen si es necesario
             corNoContesto: false,
-          }
-        ]
-      }
-    })
-    console.log("VALOR DE CONTESTACIONES "); 
+          },
+        ],
+      };
+    });
+    console.log('VALOR DE CONTESTACIONES ');
     console.log(pregunta.contestaciones);
 
-    console.log("Valor de preguntas:");
-    console.log(this.preguntas); 
-    
-    
-    
+    console.log('Valor de preguntas:');
+    console.log(this.preguntas);
+
     this.calcularValoresPonderados();
   }
 
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    // pregunta.respuesta[0].resValor = inputElement.value; 
-    pregunta.contestaciones[0] =  {
-      corId: 0, 
+    // pregunta.respuesta[0].resValor = inputElement.value;
+    pregunta.contestaciones[0] = {
+      corId: 0,
       corResId: 1,
       corPreId: pregunta.preId,
       corValor: inputElement.value,
-      corImagen: '', 
+      corImagen: '',
       corNoContesto: false,
-    }; 
-    console.log("WRITTING"); 
-    // this.preguntas.map((pregunta)=>{
-    //   return {
-    //     ...pregunta, 
-    //     contestaciones: [
-    //       ...pregunta.contestaciones,
-    //       {
-    //         corId: 0, 
-    //         corResId: 1,
-    //         corPreId: pregunta.preId,
-    //         corValor: inputElement.value,
-    //         corImagen: '', 
-    //         corNoContesto: false,
-    //       }
-    //     ]
-    //   }
-    // })
-    console.log("Valor de preguntas:");
-    console.log(this.preguntas); 
-    
+    };
+    console.log('WRITTING');
+
+    console.log('Valor de preguntas:');
+    console.log(this.preguntas);
+
     this.calcularValoresPonderados(); // Recalcula los valores ponderados si es necesario
   }
 
@@ -209,7 +196,20 @@ export class PreguntasListComponent implements OnInit {
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
         console.log(response);
-        this.preguntas = response;
+        this.preguntas = response.map(pregunta => {
+          return {
+            ...pregunta,
+            contestaciones: pregunta.contestaciones.length > 0 ? pregunta.contestaciones : [{
+              corId: 0,
+              corResId: 0, // Ajusta esto según sea necesario
+              corPreId: pregunta.preId,
+              corValor: '',
+              corImagen: '',
+              corNoContesto: false
+            }]
+          };
+        });
+    
         this.preguntas.forEach((pregunta) => {
           pregunta.respuesta.forEach((res) => {
             res.seleccionado = pregunta.contestaciones.some(
