@@ -12,8 +12,6 @@ interface ValorPonderadoPorPilar {
   templateUrl: 'preguntas-list.component.html',
   styleUrls: ['./preguntas-list.component.css'],
 })
-
-
 export class PreguntasListComponent implements OnInit {
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
@@ -28,7 +26,6 @@ export class PreguntasListComponent implements OnInit {
   }
 
   calcularValoresPonderados() {
-
     const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntas.reduce(
       (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
         const prePilId = pregunta.prePilId;
@@ -127,10 +124,45 @@ export class PreguntasListComponent implements OnInit {
     }
 
     pregunta.respuesta.forEach((res) => (res.seleccionado = res === respuesta));
+    // Actualiza las contestaciones según las respuestas seleccionadas
+    pregunta.contestaciones = pregunta.contestaciones.filter(
+      (cont) => cont.corPreId !== pregunta.preId
+    );
+    pregunta.contestaciones.push({
+      corId: 0, // Asigna un ID si es necesario
+      corResId: respuesta.resId,
+      corPreId: pregunta.preId,
+      corValor: respuesta.resValor,
+      corImagen: '', // Asigna una imagen si es necesario
+      corNoContesto: false,
+    });
+    this.preguntas.map((pregunta)=>{
+      return {
+        ...pregunta, 
+        contestaciones: [
+          ...pregunta.contestaciones,
+          {
+            corId: 0, // Asigna un ID si es necesario
+            corResId: respuesta.resId,
+            corPreId: pregunta.preId,
+            corValor: respuesta.resValor,
+            corImagen: '', // Asigna una imagen si es necesario
+            corNoContesto: false,
+          }
+        ]
+      }
+    })
+    console.log("VALOR DE CONTESTACIONES "); 
+    console.log(pregunta.contestaciones);
 
+    console.log("Valor de preguntas:");
+    console.log(this.preguntas); 
+    
+    
+    
     this.calcularValoresPonderados();
   }
-  
+
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     pregunta.respuesta[0].resValor = inputElement.value; // Asume que solo hay una respuesta asociada con el campo de texto
@@ -145,16 +177,33 @@ export class PreguntasListComponent implements OnInit {
   }
 
   searchPreguntas() {
-    console.log("PREGUNTAS:"); 
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
         console.log(response);
         this.preguntas = response;
+        this.preguntas.forEach((pregunta) => {
+          pregunta.respuesta.forEach((res) => {
+            res.seleccionado = pregunta.contestaciones.some(
+              (cont) =>
+                cont.corResId === res.resId && cont.corPreId === pregunta.preId
+            );
+            if (pregunta.preTipId === 3) {
+              // Para preguntas abiertas, asignar el valor de la contestación
+              const contestacion = pregunta.contestaciones.find(
+                (cont) => cont.corPreId === pregunta.preId
+              );
+              if (contestacion) {
+                res.resValor = contestacion.corValor;
+              }
+            }
+          });
+        });
+
         this.preguntasVisibles = this.preguntas
           .sort((a, b) => a.prePilId - b.prePilId)
           .filter((p) => !p.prePreIdTrigger);
-
+        console.log('DATOS RECIBIDOS y ya ordenados.');
         console.log('Se muestra tu array ordenado:');
         console.log(
           this.preguntas
