@@ -165,7 +165,35 @@ export class PreguntasListComponent implements OnInit {
 
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-    pregunta.respuesta[0].resValor = inputElement.value; // Asume que solo hay una respuesta asociada con el campo de texto
+    // pregunta.respuesta[0].resValor = inputElement.value; 
+    pregunta.contestaciones[0] =  {
+      corId: 0, 
+      corResId: 1,
+      corPreId: pregunta.preId,
+      corValor: inputElement.value,
+      corImagen: '', 
+      corNoContesto: false,
+    }; 
+    console.log("WRITTING"); 
+    // this.preguntas.map((pregunta)=>{
+    //   return {
+    //     ...pregunta, 
+    //     contestaciones: [
+    //       ...pregunta.contestaciones,
+    //       {
+    //         corId: 0, 
+    //         corResId: 1,
+    //         corPreId: pregunta.preId,
+    //         corValor: inputElement.value,
+    //         corImagen: '', 
+    //         corNoContesto: false,
+    //       }
+    //     ]
+    //   }
+    // })
+    console.log("Valor de preguntas:");
+    console.log(this.preguntas); 
+    
     this.calcularValoresPonderados(); // Recalcula los valores ponderados si es necesario
   }
 
