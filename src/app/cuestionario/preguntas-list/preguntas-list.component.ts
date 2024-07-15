@@ -244,32 +244,29 @@ export class PreguntasListComponent implements OnInit {
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
         console.log(response);
-        this.preguntas = response.map((pregunta) => {
-          return {
-            ...pregunta,
-            contestaciones:
-              pregunta.contestaciones.length > 0
-                ? pregunta.contestaciones
-                : [
-                    {
-                      corId: 0,
-                      corResId: 0, // Ajusta esto según sea necesario
-                      corPreId: pregunta.preId,
-                      corValor: '',
-                      corImagen: '',
-                      corNoContesto: false,
-                    },
-                  ],
-          };
-        });
-
+  
+        this.preguntas = response.map((pregunta) => ({
+          ...pregunta,
+          contestaciones: pregunta.contestaciones.length > 0 
+            ? pregunta.contestaciones 
+            : [
+                {
+                  corId: 0,
+                  corResId: 0, // Ajusta esto según sea necesario
+                  corPreId: pregunta.preId,
+                  corValor: '',
+                  corImagen: '',
+                  corNoContesto: false,
+                },
+              ],
+        }));
+  
         this.preguntas.forEach((pregunta) => {
           pregunta.respuesta.forEach((res) => {
             res.seleccionado = pregunta.contestaciones.some(
-              (cont) =>
-                cont.corResId === res.resId && cont.corPreId === pregunta.preId
+              (cont) => cont.corResId === res.resId && cont.corPreId === pregunta.preId
             );
-
+  
             if (pregunta.preTipId === 3) {
               // Para preguntas abiertas, asignar el valor de la contestación
               const contestacion = pregunta.contestaciones.find(
@@ -281,59 +278,40 @@ export class PreguntasListComponent implements OnInit {
             }
           });
         });
-
-        // Filtrar preguntas visibles
-        // Filtrar preguntas visibles
-        this.preguntasVisibles = this.preguntas.filter((pregunta) => {
+  
+        // Crear el mapeo de preguntas normales
+        const preguntasMap = new Map<number, Pregunta[]>();
+        this.preguntas.forEach(pregunta => {
           if (!pregunta.prePreIdTrigger && !pregunta.preResIdTrigger) {
-            return true; // Pregunta normal
-          }
-
-          // Verificar si la pregunta debe ser visible según todas las contestaciones
-          return this.preguntas.some((p) => {
-            return p.contestaciones.some((cont) => {
-              if (pregunta.preResIdTrigger == cont.corResId) {
-                console.log('PREGUNTA QUE DEBERIA RENDERIZARSE: ');
-                console.log(pregunta.prePregunta);
-              }
-              return (
-                cont.corPreId === pregunta.prePreIdTrigger &&
-                cont.corResId === pregunta.preResIdTrigger
-              );
-            });
-          });
-        });
-
-        console.log('DATOS RECIBIDOS y ya ordenados.');
-        console.log('Se muestra tu array ordenado:');
-        console.log(
-          this.preguntas.filter((pregunta) => {
-            if (!pregunta.prePreIdTrigger && !pregunta.preResIdTrigger) {
-              return true; // Pregunta normal
+            if (!preguntasMap.has(pregunta.preId)) {
+              preguntasMap.set(pregunta.preId, []);
             }
-
-            // Verificar si la pregunta debe ser visible según todas las contestaciones
-            return this.preguntas.some((p) => {
-              return p.contestaciones.some((cont) => {
-                // console.log("pregunta.prePreIdTrigger-----");
-                // console.log(pregunta.prePreIdTrigger);
-                // console.log("cont.corPreId");
-                // console.log(cont.corPreId);
-                // console.log(cont.corPreId == pregunta.prePreIdTrigger);
-
-                // console.log("pregunta.preResIdTrigger");
-                // console.log(pregunta.preResIdTrigger);
-                // console.log("cont.corResId");
-                // console.log(cont.corResId);
-
-                return (
-                  cont.corPreId === pregunta.prePreIdTrigger &&
-                  cont.corResId === pregunta.preResIdTrigger
-                );
-              });
-            });
-          })
-        );
+            preguntasMap.get(pregunta.preId)!.push(pregunta);
+          }
+        });
+  
+        // Agregar preguntas hijas al mapeo
+        this.preguntas.forEach(pregunta => {
+          if (pregunta.prePreIdTrigger && pregunta.preResIdTrigger) {
+            const padre = this.preguntas.find(p => p.preId === pregunta.prePreIdTrigger);
+            if (padre && padre.contestaciones.some(cont => 
+                cont.corPreId === pregunta.prePreIdTrigger && cont.corResId === pregunta.preResIdTrigger)) {
+              if (!preguntasMap.has(padre.preId)) {
+                preguntasMap.set(padre.preId, []);
+              }
+              preguntasMap.get(padre.preId)!.push(pregunta);
+            }
+          }
+        });
+  
+        // Convertir el mapeo en un array ordenado de preguntas visibles
+        this.preguntasVisibles = [];
+        preguntasMap.forEach(preguntas => {
+          this.preguntasVisibles.push(...preguntas);
+        });
+  
+        console.log(this.preguntasVisibles);
+  
         this.calcularValoresPonderados();
       },
       error: (error) => {
