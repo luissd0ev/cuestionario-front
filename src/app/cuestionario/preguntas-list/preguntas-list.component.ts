@@ -78,7 +78,6 @@ export class PreguntasListComponent implements OnInit {
   }
 
   guardar() {
-    console.log('GUARDANDO');
     const preguntasFiltro = this.preguntasVisibles.map((pregunta) => {
       return {
         ...pregunta,
@@ -129,29 +128,15 @@ export class PreguntasListComponent implements OnInit {
   }
 
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
-    
     const getCorId = pregunta.contestaciones[0].corId ?? 0;
-        
-    if (pregunta.preTipId === 3) {
-      this.desactivarPreguntasHijas(pregunta);
-    }
 
-    const nuevasPreguntas = this.preguntas.filter(
-      (p) =>
-        p.prePreIdTrigger === pregunta.preId &&
-        p.preResIdTrigger === respuesta.resId
-    );
+    // Desactivar las preguntas hijas de la pregunta actual antes de actualizar la respuesta seleccionada
+    this.desactivarPreguntasHijass(pregunta);
 
-    const index = this.preguntasVisibles.indexOf(pregunta) + 1;
-
-    for (const nuevaPregunta of nuevasPreguntas) {
-      if (!this.preguntasVisibles.includes(nuevaPregunta)) {
-        this.preguntasVisibles.splice(index, 0, nuevaPregunta);
-      }
-    }
-
+    // Actualizar las respuestas seleccionadas
     pregunta.respuesta.forEach((res) => (res.seleccionado = res === respuesta));
-    // Actualiza las contestaciones según las respuestas seleccionadas
+
+    // Actualizar las contestaciones según las respuestas seleccionadas
     pregunta.contestaciones = pregunta.contestaciones.filter(
       (cont) => cont.corPreId !== pregunta.preId
     );
@@ -165,8 +150,25 @@ export class PreguntasListComponent implements OnInit {
       corNoContesto: false,
     });
 
+    // Encontrar preguntas que serán agregadas
+    const nuevasPreguntas = this.preguntas.filter(
+      (p) =>
+        p.prePreIdTrigger === pregunta.preId &&
+        p.preResIdTrigger === respuesta.resId
+    );
 
-    this.preguntas.map((pregunta) => {
+    // Encontrar el índice de la pregunta actual, seleccionada
+    const index = this.preguntasVisibles.indexOf(pregunta) + 1;
+
+    // Insertar las nuevas preguntas después del índice de la pregunta actual
+    for (const nuevaPregunta of nuevasPreguntas) {
+      if (!this.preguntasVisibles.includes(nuevaPregunta)) {
+        this.preguntasVisibles.splice(index, 0, nuevaPregunta);
+      }
+    }
+
+    // Actualizar el array de preguntas
+    this.preguntas = this.preguntas.map((pregunta) => {
       return {
         ...pregunta,
         contestaciones: [
@@ -182,13 +184,29 @@ export class PreguntasListComponent implements OnInit {
         ],
       };
     });
-   
+
+    // Recalcular los valores ponderados
     this.calcularValoresPonderados();
+  }
+
+  desactivarPreguntasHijass(pregunta: Pregunta): void {
+    const preguntasHijas = this.preguntas.filter(
+      (p) => p.prePreIdTrigger === pregunta.preId
+    );
+
+    preguntasHijas.forEach((preguntaHija) => {
+      // Desactivar recursivamente las preguntas hijas
+      this.desactivarPreguntasHijas(preguntaHija);
+    });
+
+    this.preguntasVisibles = this.preguntasVisibles.filter(
+      (p) => p.prePreIdTrigger !== pregunta.preId
+    );
   }
 
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
-   
+
     const getCorId = pregunta.contestaciones[0].corId ?? 0;
 
     pregunta.contestaciones[0] = {
@@ -199,9 +217,8 @@ export class PreguntasListComponent implements OnInit {
       corImagen: '',
       corNoContesto: false,
     };
-  
-    this.calcularValoresPonderados(); 
-  
+
+    this.calcularValoresPonderados();
   }
 
   obtenerPreguntasDelPilarActual(): Pregunta[] {
@@ -223,7 +240,6 @@ export class PreguntasListComponent implements OnInit {
   }
 
   searchPreguntas() {
-
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
@@ -253,6 +269,7 @@ export class PreguntasListComponent implements OnInit {
               (cont) =>
                 cont.corResId === res.resId && cont.corPreId === pregunta.preId
             );
+
             if (pregunta.preTipId === 3) {
               // Para preguntas abiertas, asignar el valor de la contestación
               const contestacion = pregunta.contestaciones.find(
@@ -265,15 +282,57 @@ export class PreguntasListComponent implements OnInit {
           });
         });
 
-        this.preguntasVisibles = this.preguntas
-          .sort((a, b) => a.prePilId - b.prePilId)
-          .filter((p) => !p.prePreIdTrigger);
+        // Filtrar preguntas visibles
+        // Filtrar preguntas visibles
+        this.preguntasVisibles = this.preguntas.filter((pregunta) => {
+          if (!pregunta.prePreIdTrigger && !pregunta.preResIdTrigger) {
+            return true; // Pregunta normal
+          }
+
+          // Verificar si la pregunta debe ser visible según todas las contestaciones
+          return this.preguntas.some((p) => {
+            return p.contestaciones.some((cont) => {
+              if (pregunta.preResIdTrigger == cont.corResId) {
+                console.log('PREGUNTA QUE DEBERIA RENDERIZARSE: ');
+                console.log(pregunta.prePregunta);
+              }
+              return (
+                cont.corPreId === pregunta.prePreIdTrigger &&
+                cont.corResId === pregunta.preResIdTrigger
+              );
+            });
+          });
+        });
+
         console.log('DATOS RECIBIDOS y ya ordenados.');
         console.log('Se muestra tu array ordenado:');
         console.log(
-          this.preguntas
-            .sort((a, b) => a.prePilId - b.prePilId)
-            .filter((p) => !p.prePreIdTrigger)
+          this.preguntas.filter((pregunta) => {
+            if (!pregunta.prePreIdTrigger && !pregunta.preResIdTrigger) {
+              return true; // Pregunta normal
+            }
+
+            // Verificar si la pregunta debe ser visible según todas las contestaciones
+            return this.preguntas.some((p) => {
+              return p.contestaciones.some((cont) => {
+                // console.log("pregunta.prePreIdTrigger-----");
+                // console.log(pregunta.prePreIdTrigger);
+                // console.log("cont.corPreId");
+                // console.log(cont.corPreId);
+                // console.log(cont.corPreId == pregunta.prePreIdTrigger);
+
+                // console.log("pregunta.preResIdTrigger");
+                // console.log(pregunta.preResIdTrigger);
+                // console.log("cont.corResId");
+                // console.log(cont.corResId);
+
+                return (
+                  cont.corPreId === pregunta.prePreIdTrigger &&
+                  cont.corResId === pregunta.preResIdTrigger
+                );
+              });
+            });
+          })
         );
         this.calcularValoresPonderados();
       },
@@ -282,7 +341,5 @@ export class PreguntasListComponent implements OnInit {
         console.log(error);
       },
     });
-  
   }
-
 }

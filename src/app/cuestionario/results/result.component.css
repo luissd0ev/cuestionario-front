@@ -1,6 +1,8 @@
 /* preguntas-report.component.css */
 .report-container {
-    padding: 20px;
+    padding: 30px;
+    width: 90%;
+    margin: 0 auto; 
   }
   
   .report-table {
@@ -14,6 +16,8 @@
   }
   
   .report-table th {
-    background-color: #f2f2f2;
+    background-color: #3498db;
     text-align: left;
+    color: white; 
   }
+  
