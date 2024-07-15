@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PreguntaListService } from './preguntas-list.service';
 import { Pregunta, Respuesta } from './preguntas-list.interface';
+import {ActivatedRoute, Router } from '@angular/router';
 
 interface ValorPonderadoPorPilar {
   prePilId: number;
@@ -13,12 +14,13 @@ interface ValorPonderadoPorPilar {
   styleUrls: ['./preguntas-list.component.css'],
 })
 export class PreguntasListComponent implements OnInit {
+
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
 
-  constructor(private preguntaListService: PreguntaListService) {}
+  constructor(private preguntaListService: PreguntaListService, private router: Router) {}
 
   ngOnInit(): void {
     this.loadStateFromLocalStorage();
@@ -108,6 +110,11 @@ export class PreguntasListComponent implements OnInit {
     }
   }
 
+
+  direccionar() {
+
+  this.router.navigate(['/preguntas/result']); 
+  }
   guardar() {
     console.log('GUARDANDO');
     const preguntasFiltro = this.preguntasVisibles.map(pregunta=>{

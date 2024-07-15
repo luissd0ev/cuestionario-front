@@ -12,6 +12,7 @@ import { MatInputModule } from "@angular/material/input";
 import { PreguntasListComponent } from "./preguntas-list/preguntas-list.component";
 import { CuestionarioRoutingModule } from "./cuestionario.routing.module";
 import { PreguntaListService } from "./preguntas-list/preguntas-list.service";
+import { ResultComponent } from "./results/result.component";
 
 ///Agregar componentes genericos para usar materials
 @NgModule(
@@ -32,11 +33,11 @@ import { PreguntaListService } from "./preguntas-list/preguntas-list.service";
             
         ],
         ///Componentes que forman parte del modulo.
-        declarations: [PreguntasListComponent],
+        declarations: [PreguntasListComponent, ResultComponent],
         ///servicios que puedo usar en los componentes
         providers: [PreguntaListService,ToastrService],
         ///Quiero que el componente pueda ser usado en otros components
-        exports: [PreguntasListComponent]
+        exports: [PreguntasListComponent, ResultComponent]
     }
 )
 

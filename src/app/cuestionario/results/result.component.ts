@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Pregunta } from '../preguntas-list/preguntas-list.interface';
+import { Router } from '@angular/router';
+import { PreguntaListService } from '../preguntas-list/preguntas-list.service';
 
 interface ValorPonderadoPorPilar {
   prePilId: number;
@@ -11,30 +13,71 @@ interface ValorPonderadoPorPilar {
   templateUrl: 'result.component.html',
   styleUrls: ['./result.component.css'],
 })
-
 export class ResultComponent implements OnInit {
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
+  constructor(private preguntaListService: PreguntaListService,private router: Router) {}
+  calcularValorPonderado(pregunta: Pregunta): number {
+    const totalValorEvaluacion = pregunta.respuesta
+      .filter(res => res.seleccionado)
+      .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+    const promedioValorPregunta = totalValorEvaluacion / pregunta.respuesta.filter(res => res.seleccionado).length;
+    return isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta;
+  }
+  volver() {
+    this.router.navigate(['/preguntas']);
+  }
+
 
   ngOnInit(): void {
-    this.loadStateFromLocalStorage();
+    this.searchPreguntas();
   }
 
-  loadStateFromLocalStorage() {
-    const savedState = localStorage.getItem('preguntasState');
-    console.log("DATOS DEL LOCALSTORAGE:");
-    console.log(savedState); 
-   
-    if (savedState) {
-      const state = JSON.parse(savedState);
-      console.log("STATE:");
-      console.log(state); 
-      this.preguntas = state.preguntas || [];
-      this.preguntasVisibles = state.preguntasVisibles || [];
-      this.valoresPonderadosPorPilar = state.valoresPonderadosPorPilar || [];
-      this.pilarActualIndex = state.pilarActualIndex || 0;
-    }
+
+  searchPreguntas() {
+    this.preguntaListService.searchPreguntas().subscribe({
+      next: (response) => {
+        this.preguntas = response.map(pregunta => {
+          return {
+            ...pregunta,
+            contestaciones: pregunta.contestaciones.length > 0 ? pregunta.contestaciones : [{
+              corId: 0,
+              corResId: 0,
+              corPreId: pregunta.preId,
+              corValor: '',
+              corImagen: '',
+              corNoContesto: false
+            }]
+          };
+        });
+
+        this.preguntas.forEach((pregunta) => {
+          pregunta.respuesta.forEach((res) => {
+            res.seleccionado = pregunta.contestaciones.some(
+              (cont) =>
+                cont.corResId === res.resId && cont.corPreId === pregunta.preId
+            );
+            if (pregunta.preTipId === 3) {
+              const contestacion = pregunta.contestaciones.find(
+                (cont) => cont.corPreId === pregunta.preId
+              );
+              if (contestacion) {
+                res.resValor = contestacion.corValor;
+              }
+            }
+          });
+        });
+
+        console.log("Valor de preguntas: ");
+        console.log(this.preguntas); 
+      },
+      error: (error) => {
+        console.log('error al ejecutar la respuesta');
+        console.log(error);
+      }
+    });
   }
+
 }

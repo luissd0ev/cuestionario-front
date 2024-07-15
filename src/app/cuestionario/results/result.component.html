@@ -1,18 +1,37 @@
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
 
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
-<h2>En este componente se muestran los resultados</h2>
+<div class="report-container">
+  <h3>Reporte de Preguntas</h3>
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th>Pregunta</th>
+        <th>Respuesta Seleccionada</th>
+        <th>Valor de Respuesta</th>
+        <th>Valor Ponderado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let pregunta of preguntas">
+        <td>{{ pregunta.prePregunta }}</td>
+        <td>
+          <span *ngFor="let respuesta of pregunta.respuesta">
+            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValor }}</span>
+          </span>
+        </td>
+        <td>
+          <span *ngFor="let respuesta of pregunta.respuesta">
+            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValorEvaluacion }}</span>
+          </span>
+        </td>
+        <td>
+          <span *ngIf="pregunta.contestaciones.length > 0">
+            {{ calcularValorPonderado(pregunta) }}
+          </span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
 <div class="result-container">
     <h3>Resultados</h3>
@@ -26,8 +45,9 @@
       <h4>Pregunta: {{ pregunta.prePregunta }}</h4>
       <ul>
         <li *ngFor="let respuesta of pregunta.respuesta">
-          {{ respuesta.resDescripcion }} - Seleccionado: {{ respuesta.seleccionado ? 'Sí' : 'No' }}
+          {{ respuesta.resValor }} - Seleccionado: {{ respuesta.seleccionado ? 'Sí' : 'No' }}
         </li>
       </ul>
     </div>
+    <button (click)="volver()">Volver</button>
   </div>
