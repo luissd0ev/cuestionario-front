@@ -17,4 +17,8 @@ export class PreguntaListService {
     return this.http.get<Pregunta[]>(apiUrl, {headers: headers}); 
   } 
   
+  saveUpdateQuestions(request: Pregunta[]): Observable<Pregunta[]>{
+    const apiUrl = `${this.url}/guardar-contestaciones-respuestas`;
+    return this.http.post<Pregunta[]>(apiUrl, request, {headers: headers}); 
+  }
 }

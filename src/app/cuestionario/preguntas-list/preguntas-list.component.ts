@@ -93,19 +93,41 @@ export class PreguntasListComponent implements OnInit {
   irAPilarAnterior(): void {
     if (this.pilarActualIndex > 0) {
       this.pilarActualIndex--;
+      this.guardar(); 
       this.saveStateToLocalStorage();
+      this.searchPreguntas();
     }
   }
 
   irAPilarSiguiente(): void {
     if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
       this.pilarActualIndex++;
+      this.guardar(); 
       this.saveStateToLocalStorage();
+      this.searchPreguntas();
     }
   }
 
   guardar() {
     console.log('GUARDANDO');
+    const preguntasFiltro = this.preguntasVisibles.map(pregunta=>{
+        return {
+          ...pregunta,
+          contestaciones: pregunta.contestaciones.filter(contestacion=>{
+            return contestacion.corResId != 0; 
+          })
+        }
+    })
+    this.preguntaListService.saveUpdateQuestions(preguntasFiltro).subscribe({
+      next: result=>{
+        console.log("Datos guardados con exito."); 
+        // alert("Datos guardados con éxito.");
+      },  
+      error: error=>{
+        console.log("Error en la operación.");
+        // alert("error en la operación."); 
+      }
+    })
   }
 
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
@@ -168,8 +190,11 @@ export class PreguntasListComponent implements OnInit {
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     // pregunta.respuesta[0].resValor = inputElement.value;
+    const getCorId = pregunta.contestaciones[0].corId ?? 0;
+    console.log("EL VAOR DE CORID ES: ");
+    console.log(getCorId); 
     pregunta.contestaciones[0] = {
-      corId: 0,
+      corId: getCorId,
       corResId: 1,
       corPreId: pregunta.preId,
       corValor: inputElement.value,
