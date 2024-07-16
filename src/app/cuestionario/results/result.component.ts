@@ -41,9 +41,7 @@ export class ResultComponent implements OnInit {
   searchPreguntas() {
     this.preguntaListService.searchPreguntas().subscribe({
       next: (response) => {
-        console.log('Se muestra el resultado de las preguntas');
-        console.log(response);
-
+        ///Asignar valores default a preguntas sin contestaciones
         this.preguntas = response.map((pregunta) => ({
           ...pregunta,
           contestaciones:
@@ -61,6 +59,8 @@ export class ResultComponent implements OnInit {
                 ],
         }));
 
+
+        ///Proceso para mostrar las contestaciones
         this.preguntas.forEach((pregunta) => {
           pregunta.respuesta.forEach((res) => {
             res.seleccionado = pregunta.contestaciones.some(
@@ -80,7 +80,7 @@ export class ResultComponent implements OnInit {
           });
         });
 
-      
+        ///Proceso para encontrar preguntas padre
         const preguntasMap = new Map<number, Pregunta[]>();
         this.preguntas.forEach((pregunta) => {
           if (!pregunta.prePreIdTrigger && !pregunta.preResIdTrigger) {
@@ -91,7 +91,7 @@ export class ResultComponent implements OnInit {
           }
         });
 
-        // Agregar preguntas hijas al mapeo
+        // Agregar preguntas hijas al mapeo, las cuales hayan sido disparadas ya
         this.preguntas.forEach((pregunta) => {
           if (pregunta.prePreIdTrigger && pregunta.preResIdTrigger) {
             const padre = this.preguntas.find(
@@ -112,14 +112,14 @@ export class ResultComponent implements OnInit {
             }
           }
         });
+        console.log('PREGUNTAS MAP DESPUES DE ASIGNAR HIJAS A PADRE');
+        console.log(preguntasMap);
 
         // Convertir el mapeo en un array ordenado de preguntas visibles
         this.preguntasVisibles = [];
         preguntasMap.forEach((preguntas) => {
           this.preguntasVisibles.push(...preguntas);
         });
-
-        console.log(this.preguntasVisibles);
 
         this.calcularValoresPonderados();
       },
@@ -131,48 +131,47 @@ export class ResultComponent implements OnInit {
   }
 
   calcularValoresPonderados(): void {
+    
 
-    console.log("MOSTRAR PREGUNTAS VISIBLES");
-    console.log(this.preguntasVisibles);
-    
-    
-    const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntasVisibles.reduce(
-      (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
-        const prePilId = pregunta.prePilId;
-        if (!acc[prePilId]) {
-          acc[prePilId] = [];
-        }
-        acc[prePilId].push(pregunta);
-        return acc;
-      },
-      {}
-    );
-    console.log("VALORES POR PILAR:");
+    const preguntasPorPilar: Record<number, Pregunta[]> =
+      this.preguntasVisibles.reduce(
+        (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
+          const prePilId = pregunta.prePilId;
+          if (!acc[prePilId]) {
+            acc[prePilId] = [];
+          }
+          acc[prePilId].push(pregunta);
+          return acc;
+        },
+        {}
+      );
+    console.log('VALORES POR PILAR:');
     console.log(preguntasPorPilar);
-    
-    
+
     this.valoresPonderadosPorPilar = [];
-  
+
     for (const prePilId in preguntasPorPilar) {
       const preguntas = preguntasPorPilar[prePilId];
-  
+
       const totalValorEvaluacion = preguntas.reduce((acc, pregunta) => {
         const totalValorPregunta = pregunta.respuesta
           .filter((res) => res.seleccionado)
           .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-  
-        const promedioValorPregunta = totalValorPregunta / pregunta.respuesta.filter((res) => res.seleccionado).length;
+
+        const promedioValorPregunta =
+          totalValorPregunta /
+          pregunta.respuesta.filter((res) => res.seleccionado).length;
         return acc + (isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta);
       }, 0);
-  
+
       const promedioPilar = totalValorEvaluacion / preguntas.length;
-  
+
       this.valoresPonderadosPorPilar.push({
         prePilId: Number(prePilId),
         valorPonderado: promedioPilar,
       });
     }
-  
+
     console.log(this.valoresPonderadosPorPilar);
   }
 

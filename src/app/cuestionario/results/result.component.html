@@ -17,7 +17,9 @@
         <td>{{ pregunta.prePregunta }}</td>
         <td>
           <span *ngFor="let respuesta of pregunta.respuesta">
-            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValor }}</span>
+            <ng-container *ngIf="respuesta.seleccionado">
+              <span>{{ respuesta.resValor  }}</span>
+            </ng-container>
           </span>
         </td>
         <!-- <td>
