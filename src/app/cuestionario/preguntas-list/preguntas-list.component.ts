@@ -74,10 +74,24 @@ export class PreguntasListComponent implements OnInit {
   }
 
   direccionar() {
-    this.router.navigate(['/preguntas/result']);
+    this.guardar(1);
   }
 
-  guardar() {
+  desactivarPreguntasHijass(pregunta: Pregunta): void {
+    const preguntasHijas = this.preguntas.filter(
+      (p) => p.prePreIdTrigger === pregunta.preId
+    );
+
+    preguntasHijas.forEach((preguntaHija) => {
+      // Desactivar recursivamente las preguntas hijas
+      this.desactivarPreguntasHijas(preguntaHija);
+    });
+
+    this.preguntasVisibles = this.preguntasVisibles.filter(
+      (p) => p.prePreIdTrigger !== pregunta.preId
+    );
+  }
+  guardar(tipoGuardado?: number) {
     const preguntasFiltro = this.preguntasVisibles.map((pregunta) => {
       return {
         ...pregunta,
@@ -90,6 +104,9 @@ export class PreguntasListComponent implements OnInit {
       next: (result) => {
         console.log('Datos guardados con exito.');
         // alert("Datos guardados con éxito.");
+        if (tipoGuardado == 1) {
+          this.router.navigate(['/preguntas/result']);
+        }
       },
       error: (error) => {
         console.log('Error en la operación.');
@@ -189,21 +206,6 @@ export class PreguntasListComponent implements OnInit {
     this.calcularValoresPonderados();
   }
 
-  desactivarPreguntasHijass(pregunta: Pregunta): void {
-    const preguntasHijas = this.preguntas.filter(
-      (p) => p.prePreIdTrigger === pregunta.preId
-    );
-
-    preguntasHijas.forEach((preguntaHija) => {
-      // Desactivar recursivamente las preguntas hijas
-      this.desactivarPreguntasHijas(preguntaHija);
-    });
-
-    this.preguntasVisibles = this.preguntasVisibles.filter(
-      (p) => p.prePreIdTrigger !== pregunta.preId
-    );
-  }
-
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
 
@@ -244,29 +246,31 @@ export class PreguntasListComponent implements OnInit {
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
         console.log(response);
-  
+
         this.preguntas = response.map((pregunta) => ({
           ...pregunta,
-          contestaciones: pregunta.contestaciones.length > 0 
-            ? pregunta.contestaciones 
-            : [
-                {
-                  corId: 0,
-                  corResId: 0, // Ajusta esto según sea necesario
-                  corPreId: pregunta.preId,
-                  corValor: '',
-                  corImagen: '',
-                  corNoContesto: false,
-                },
-              ],
+          contestaciones:
+            pregunta.contestaciones.length > 0
+              ? pregunta.contestaciones
+              : [
+                  {
+                    corId: 0,
+                    corResId: 0, // Ajusta esto según sea necesario
+                    corPreId: pregunta.preId,
+                    corValor: '',
+                    corImagen: '',
+                    corNoContesto: false,
+                  },
+                ],
         }));
-  
+
         this.preguntas.forEach((pregunta) => {
           pregunta.respuesta.forEach((res) => {
             res.seleccionado = pregunta.contestaciones.some(
-              (cont) => cont.corResId === res.resId && cont.corPreId === pregunta.preId
+              (cont) =>
+                cont.corResId === res.resId && cont.corPreId === pregunta.preId
             );
-  
+
             if (pregunta.preTipId === 3) {
               // Para preguntas abiertas, asignar el valor de la contestación
               const contestacion = pregunta.contestaciones.find(
@@ -278,10 +282,10 @@ export class PreguntasListComponent implements OnInit {
             }
           });
         });
-  
+
         // Crear el mapeo de preguntas normales
         const preguntasMap = new Map<number, Pregunta[]>();
-        this.preguntas.forEach(pregunta => {
+        this.preguntas.forEach((pregunta) => {
           if (!pregunta.prePreIdTrigger && !pregunta.preResIdTrigger) {
             if (!preguntasMap.has(pregunta.preId)) {
               preguntasMap.set(pregunta.preId, []);
@@ -289,13 +293,21 @@ export class PreguntasListComponent implements OnInit {
             preguntasMap.get(pregunta.preId)!.push(pregunta);
           }
         });
-  
+
         // Agregar preguntas hijas al mapeo
-        this.preguntas.forEach(pregunta => {
+        this.preguntas.forEach((pregunta) => {
           if (pregunta.prePreIdTrigger && pregunta.preResIdTrigger) {
-            const padre = this.preguntas.find(p => p.preId === pregunta.prePreIdTrigger);
-            if (padre && padre.contestaciones.some(cont => 
-                cont.corPreId === pregunta.prePreIdTrigger && cont.corResId === pregunta.preResIdTrigger)) {
+            const padre = this.preguntas.find(
+              (p) => p.preId === pregunta.prePreIdTrigger
+            );
+            if (
+              padre &&
+              padre.contestaciones.some(
+                (cont) =>
+                  cont.corPreId === pregunta.prePreIdTrigger &&
+                  cont.corResId === pregunta.preResIdTrigger
+              )
+            ) {
               if (!preguntasMap.has(padre.preId)) {
                 preguntasMap.set(padre.preId, []);
               }
@@ -303,15 +315,15 @@ export class PreguntasListComponent implements OnInit {
             }
           }
         });
-  
+
         // Convertir el mapeo en un array ordenado de preguntas visibles
         this.preguntasVisibles = [];
-        preguntasMap.forEach(preguntas => {
+        preguntasMap.forEach((preguntas) => {
           this.preguntasVisibles.push(...preguntas);
         });
-  
+
         console.log(this.preguntasVisibles);
-  
+
         this.calcularValoresPonderados();
       },
       error: (error) => {

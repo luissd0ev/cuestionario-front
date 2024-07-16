@@ -21,6 +21,11 @@
               <span>{{ respuesta.resValor  }}</span>
             </ng-container>
           </span>
+          <span *ngFor="let contestacion of pregunta.contestaciones">
+            <ng-container *ngIf="contestacion.corValor">
+              <span>{{ contestacion.corValor  }}</span>
+            </ng-container>
+          </span>
         </td>
         <!-- <td>
           <span *ngFor="let respuesta of pregunta.respuesta">
