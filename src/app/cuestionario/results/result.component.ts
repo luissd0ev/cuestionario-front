@@ -28,6 +28,50 @@ export class ResultComponent implements OnInit {
     this.searchPreguntas();
   }
 
+  calcularValoresPonderados(): void {
+    
+
+    const preguntasPorPilar: Record<number, Pregunta[]> =
+      this.preguntasVisibles.reduce(
+        (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
+          const prePilId = pregunta.prePilId;
+          if (!acc[prePilId]) {
+            acc[prePilId] = [];
+          }
+          acc[prePilId].push(pregunta);
+          return acc;
+        },
+        {}
+      );
+
+
+    this.valoresPonderadosPorPilar = [];
+
+    for (const prePilId in preguntasPorPilar) {
+      const preguntas = preguntasPorPilar[prePilId];
+
+      const totalValorEvaluacion = preguntas.reduce((acc, pregunta) => {
+        const totalValorPregunta = pregunta.respuesta
+          .filter((res) => res.seleccionado)
+          .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+
+        const promedioValorPregunta =
+          totalValorPregunta /
+          pregunta.respuesta.filter((res) => res.seleccionado).length;
+        return acc + (isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta);
+      }, 0);
+
+      const promedioPilar = totalValorEvaluacion / preguntas.length;
+
+      this.valoresPonderadosPorPilar.push({
+        prePilId: Number(prePilId),
+        valorPonderado: promedioPilar,
+      });
+    }
+
+
+  }
+
   calcularValorPonderado(pregunta: Pregunta): number {
     const totalValorEvaluacion = pregunta.respuesta
       .filter((res) => res.seleccionado)
@@ -130,50 +174,7 @@ export class ResultComponent implements OnInit {
     });
   }
 
-  calcularValoresPonderados(): void {
-    
-
-    const preguntasPorPilar: Record<number, Pregunta[]> =
-      this.preguntasVisibles.reduce(
-        (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
-          const prePilId = pregunta.prePilId;
-          if (!acc[prePilId]) {
-            acc[prePilId] = [];
-          }
-          acc[prePilId].push(pregunta);
-          return acc;
-        },
-        {}
-      );
-    console.log('VALORES POR PILAR:');
-    console.log(preguntasPorPilar);
-
-    this.valoresPonderadosPorPilar = [];
-
-    for (const prePilId in preguntasPorPilar) {
-      const preguntas = preguntasPorPilar[prePilId];
-
-      const totalValorEvaluacion = preguntas.reduce((acc, pregunta) => {
-        const totalValorPregunta = pregunta.respuesta
-          .filter((res) => res.seleccionado)
-          .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-
-        const promedioValorPregunta =
-          totalValorPregunta /
-          pregunta.respuesta.filter((res) => res.seleccionado).length;
-        return acc + (isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta);
-      }, 0);
-
-      const promedioPilar = totalValorEvaluacion / preguntas.length;
-
-      this.valoresPonderadosPorPilar.push({
-        prePilId: Number(prePilId),
-        valorPonderado: promedioPilar,
-      });
-    }
-
-    console.log(this.valoresPonderadosPorPilar);
-  }
+ 
 
   volver() {
     this.router.navigate(['/preguntas']);
