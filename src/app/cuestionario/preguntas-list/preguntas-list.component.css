@@ -194,3 +194,12 @@ h4 {
   margin: 0 auto; 
   margin-bottom: 1rem;
 }
+
+.boton-reporte{
+  display: flex;
+  justify-content: center;
+  
+}
+.boton-reporte button{
+  background-color: orangered;
+}

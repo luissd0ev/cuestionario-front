@@ -1,4 +1,3 @@
-<!-- preguntas-report.component.html -->
 <div class="report-container">
   <h3>Reporte de Preguntas</h3>
   <br>
@@ -8,38 +7,43 @@
         <th>Pilar</th>
         <th>Pregunta</th>
         <th>Respuesta Seleccionada</th>
-        <th>Valor de Respuesta</th>
-        <th>Valor Ponderado</th>
+        <!-- <th>Valor de Respuesta</th> -->
+        <th>Valor</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let pregunta of preguntas">
-        <td>{{ pregunta.prePilId }} </td>
-        <td>{{ pregunta.prePregunta }} </td>
+      <tr *ngFor="let pregunta of preguntasVisibles">
+        <td>{{ pregunta.prePilId }}</td>
+        <td>{{ pregunta.prePregunta }}</td>
         <td>
           <span *ngFor="let respuesta of pregunta.respuesta">
-            <span *ngIf="respuesta.seleccionado">{{respuesta.resValor}}</span>
+            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValor }}</span>
           </span>
         </td>
-        <td>
+        <!-- <td>
           <span *ngFor="let respuesta of pregunta.respuesta">
-            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValorEvaluacion }} </span>
+            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValorEvaluacion }}</span>
           </span>
-        </td>
+        </td> -->
         <td>
           <span *ngIf="pregunta.contestaciones.length > 0">
-            {{ calcularValorPonderado(pregunta) }} 
+            {{ calcularValorPonderado(pregunta) }}
           </span>
         </td>
       </tr>
     </tbody>
   </table>
-  <button (click)="volver()">Volver</button>
 
-  <div class="valores-ponderados-container">
-    <h4>Valores Ponderados por Pilar</h4>
-    <div *ngFor="let pilar of valoresPonderadosPorPilar">
-      <p>Pilar {{ pilar.prePilId }}: {{ pilar.valorPonderado }}</p>
-    </div>
+  <br>
+  <div class="nav-buttons">
+    <button  class="nav-button" (click)="volver()">Volver</button>
   </div>
+ <br>
+
+ <div class="valores-ponderados-container">
+  <h4>Valores Ponderados por Pilar</h4>
+  <div *ngFor="let pilar of valoresPonderadosPorPilar" class="pilar-item">
+    <p>Pilar {{ pilar.prePilId }}: <span class="valor">{{ pilar.valorPonderado }}</span></p>
+  </div>
+</div>
 </div>

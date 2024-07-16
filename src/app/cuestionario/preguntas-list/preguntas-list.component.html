@@ -59,18 +59,22 @@
       <button class="nav-button" (click)="irAPilarSiguiente()">
         Siguiente
       </button>
-      <button (click)="direccionar()">Reporte</button>
+      
+    </div>
+    <br><br>
+    <div class="nav-buttons boton-reporte">
+      <button class="nav-button" (click)="direccionar()">Reporte</button>
     </div>
   </div>
 
-  <div class="valores-ponderados-container">
+  <!-- <div class="valores-ponderados-container">
     <div *ngFor="let pilar of valoresPonderadosPorPilar">
       <ng-container *ngIf="pilar.prePilId === pilarActualIndex + 1">
-        <!-- <h3 class="pilar-title">Pilar ID: {{ pilar.prePilId }}</h3> -->
+       
         <p class="valor-ponderado">
           Valor Ponderado: {{ pilar.valorPonderado }}
         </p>
       </ng-container>
     </div>
-  </div>
+  </div> -->
 </div>
