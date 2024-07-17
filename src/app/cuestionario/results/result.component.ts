@@ -164,6 +164,10 @@ export class ResultComponent implements OnInit {
         preguntasMap.forEach((preguntas) => {
           this.preguntasVisibles.push(...preguntas);
         });
+        console.log("MAPEO ORDENADO");
+        console.log(this.preguntasVisibles);
+        
+        
 
         this.calcularValoresPonderados();
       },
