@@ -43,12 +43,12 @@
             <input
               type="checkbox"
               class="question-checkbox"
-              (change)="onRespuestaSeleccionada(pregunta, respuesta)"
+              (change)="onCheckboxRespuestaSeleccionada(pregunta, respuesta)"
+              [checked]="respuesta.seleccionado"
             />
-            <label class="question-checkbox-label"
-              >{{ respuesta.resValor }} a:
-              {{ respuesta.resValorEvaluacion }}</label
-            >
+            <label class="question-checkbox-label">
+              {{ respuesta.resValor }} a: {{ respuesta.resValorEvaluacion }}
+            </label>
           </div>
         </div>
       </div>

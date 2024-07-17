@@ -218,6 +218,47 @@ export class PreguntasListComponent implements OnInit {
     this.calcularValoresPonderados();
   }
 
+  onCheckboxRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
+    // Alternar la selección de la respuesta
+    respuesta.seleccionado = !respuesta.seleccionado;
+  
+    if (respuesta.seleccionado) {
+      // Añadir nueva contestación con corId inicializado en cero
+      pregunta.contestaciones.push({
+        corId: 0, // Inicializa corId en cero para nuevas contestaciones
+        corResId: respuesta.resId,
+        corPreId: pregunta.preId,
+        corValor: respuesta.resValor,
+        corImagen: '', // Asigna una imagen si es necesario
+        corNoContesto: false,
+      });
+    } else {
+      // Eliminar contestación existente si se deselecciona
+      pregunta.contestaciones = pregunta.contestaciones.filter(
+        (cont) => !(cont.corResId === respuesta.resId && cont.corPreId === pregunta.preId)
+      );
+    }
+  
+    // Encontrar preguntas que serán agregadas
+    const nuevasPreguntas = this.preguntas.filter(
+      (p) =>
+        p.prePreIdTrigger === pregunta.preId &&
+        p.preResIdTrigger === respuesta.resId
+    );
+  
+    // Encontrar el índice de la pregunta actual, seleccionada
+    const index = this.preguntasVisibles.indexOf(pregunta) + 1;
+  
+    // Insertar las nuevas preguntas después del índice de la pregunta actual
+    for (const nuevaPregunta of nuevasPreguntas) {
+      if (!this.preguntasVisibles.includes(nuevaPregunta)) {
+        this.preguntasVisibles.splice(index, 0, nuevaPregunta);
+      }
+    }
+  
+    // Recalcular los valores ponderados
+    this.calcularValoresPonderados();
+  }
 
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
