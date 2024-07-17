@@ -22,12 +22,15 @@ export class PreguntasListComponent implements OnInit {
   constructor(
     private preguntaListService: PreguntaListService,
     private router: Router
-  ) {}
+  ) {
+    
+  }
 
   ngOnInit(): void {
     this.loadStateFromLocalStorage();
     this.searchPreguntas();
   }
+
 
   calcularValoresPonderados() {
     const preguntasPorPilar: Record<number, Pregunta[]> = this.preguntas.reduce(
@@ -67,15 +70,18 @@ export class PreguntasListComponent implements OnInit {
     console.log(this.valoresPonderadosPorPilar);
   }
 
+
   desactivarPreguntasHijas(pregunta: Pregunta): void {
     this.preguntasVisibles = this.preguntasVisibles.filter(
       (p) => p.prePreIdTrigger !== pregunta.preId
     );
   }
 
+
   direccionar() {
     this.guardar(1);
   }
+
 
   desactivarPreguntasHijass(pregunta: Pregunta): void {
     const preguntasHijas = this.preguntas.filter(
@@ -91,6 +97,8 @@ export class PreguntasListComponent implements OnInit {
       (p) => p.prePreIdTrigger !== pregunta.preId
     );
   }
+
+
   guardar(tipoGuardado?: number) {
     const preguntasFiltro = this.preguntasVisibles.map((pregunta) => {
       return {
@@ -115,6 +123,7 @@ export class PreguntasListComponent implements OnInit {
     });
   }
 
+
   irAPilarAnterior(): void {
     if (this.pilarActualIndex > 0) {
       this.pilarActualIndex--;
@@ -124,6 +133,7 @@ export class PreguntasListComponent implements OnInit {
     }
   }
 
+
   irAPilarSiguiente(): void {
     if (this.pilarActualIndex < this.valoresPonderadosPorPilar.length - 1) {
       this.pilarActualIndex++;
@@ -132,6 +142,7 @@ export class PreguntasListComponent implements OnInit {
       this.searchPreguntas();
     }
   }
+
 
   loadStateFromLocalStorage() {
     const savedState = localStorage.getItem('preguntasState');
@@ -143,6 +154,7 @@ export class PreguntasListComponent implements OnInit {
       this.pilarActualIndex = state.pilarActualIndex || 0;
     }
   }
+
 
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
     const getCorId = pregunta.contestaciones[0].corId ?? 0;
@@ -206,6 +218,7 @@ export class PreguntasListComponent implements OnInit {
     this.calcularValoresPonderados();
   }
 
+
   onRespuestaTextoCambiado(pregunta: Pregunta, event: Event): void {
     const inputElement = event.target as HTMLInputElement;
 
@@ -223,12 +236,14 @@ export class PreguntasListComponent implements OnInit {
     this.calcularValoresPonderados();
   }
 
+
   obtenerPreguntasDelPilarActual(): Pregunta[] {
     const pilarActual = this.valoresPonderadosPorPilar[this.pilarActualIndex];
     return this.preguntasVisibles.filter(
       (pregunta) => pregunta.prePilId === pilarActual.prePilId
     );
   }
+
 
   saveStateToLocalStorage() {
     const state = {

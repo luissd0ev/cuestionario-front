@@ -174,9 +174,8 @@ export class ResultComponent implements OnInit {
     });
   }
 
- 
-
   volver() {
     this.router.navigate(['/preguntas']);
   }
+
 }
