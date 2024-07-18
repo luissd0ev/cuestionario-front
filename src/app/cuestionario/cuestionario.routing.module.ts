@@ -6,15 +6,16 @@ import { ResultComponent } from "./results/result.component";
 
 export const TIPO_DISPOSITIVO_ROUTES = [
     //SI NO LE PASO NADA, muestra lista
-        {
-            path: '',
-            component: PreguntasListComponent
-        },
+      
         ///PASAR ARGUMENTO ID, paso componente
         {
-            path: 'result',
+            path: ':id/result',
             component: ResultComponent
-        }
+        },
+        {
+            path: ':id',
+            component: PreguntasListComponent
+        },
     ];
     
     @NgModule({

@@ -115,8 +115,7 @@ export class PreguntasListComponent implements OnInit {
         }),
       };
     }); 
-console.log("ENVIANDO AL SIGUIENTE ID");
-console.log(this.id);
+
 
 
     this.preguntaListService.saveUpdateQuestions(preguntasFiltro, this.id).subscribe({
@@ -131,7 +130,7 @@ console.log(this.id);
         }
         this.id = result.result; 
         if (tipoGuardado == 1) {
-          this.router.navigate(['/preguntas/result']);
+          this.router.navigate([`/preguntas/${result.result}/result`]);
         }
       },
       error: (error) => {

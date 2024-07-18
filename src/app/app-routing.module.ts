@@ -3,10 +3,10 @@ import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
-    path: '',
+    path: 'preguntas',
     children: [
       {
-        path: 'preguntas/:id',
+        path: '',
         loadChildren: () =>
           import('./cuestionario/cuestionario.module').then(
             (m) => m.TiendaOnlineModule

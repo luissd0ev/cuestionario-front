@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Pregunta } from '../preguntas-list/preguntas-list.interface';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { PreguntaListService } from '../preguntas-list/preguntas-list.service';
 
 interface ValorPonderadoPorPilar {
@@ -21,7 +21,8 @@ export class ResultComponent implements OnInit {
 
   constructor(
     private preguntaListService: PreguntaListService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
@@ -179,8 +180,17 @@ export class ResultComponent implements OnInit {
     });
   }
 
+
   volver() {
-    this.router.navigate(['/preguntas']);
+    // Obtener el ID de la encuesta desde los parámetros de la ruta actual
+    const idEncuesta = this.route.snapshot.paramMap.get('id');
+  console.log("Enviar");
+  console.log(idEncuesta);
+  console.log(this.route);
+  
+  
+    // Navegar de regreso a /preguntas/:idEncuesta
+    this.router.navigate(['/preguntas', idEncuesta]);
   }
 
 }
