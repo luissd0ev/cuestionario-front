@@ -16,22 +16,14 @@
         <td>{{ pregunta.prePilId }}</td>
         <td>{{ pregunta.prePregunta }}</td>
         <td>
-          <!-- <span *ngFor="let respuesta of pregunta.respuesta">
-            <ng-container *ngIf="respuesta.seleccionado">
-              <span>{{ respuesta.resValor  }}</span>
-            </ng-container>
-          </span> -->
+  
           <span *ngFor="let contestacion of pregunta.contestaciones">
             <ng-container *ngIf="contestacion.corValor">
               <span>{{ contestacion.corValor  }}</span>
             </ng-container>
           </span>
         </td>
-        <!-- <td>
-          <span *ngFor="let respuesta of pregunta.respuesta">
-            <span *ngIf="respuesta.seleccionado">{{ respuesta.resValorEvaluacion }}</span>
-          </span>
-        </td> -->
+    
         <td>
           <span *ngIf="pregunta.contestaciones.length > 0">
             {{ calcularValorPonderado(pregunta) }}
