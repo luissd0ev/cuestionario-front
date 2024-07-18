@@ -12,13 +12,13 @@ export class PreguntaListService {
 
   constructor(private http: HttpClient) {}
 
-  searchPreguntas(): Observable<Pregunta[]>{
-    const apiUrl = `${this.url}/Allquestionss`;
+  searchPreguntas(id: number): Observable<Pregunta[]>{
+    const apiUrl = `${this.url}/Allquestions?conId=${id}`;
     return this.http.get<Pregunta[]>(apiUrl, {headers: headers}); 
   } 
   
-  saveUpdateQuestions(request: Pregunta[]): Observable<Pregunta[]>{
-    const apiUrl = `${this.url}/guardar-contestaciones-respuestas`;
+  saveUpdateQuestions(request: Pregunta[], idContestacion: number): Observable<any>{
+    const apiUrl = `${this.url}/guardar-contestaciones-respuestas?corConId=${idContestacion}`;
     return this.http.post<Pregunta[]>(apiUrl, request, {headers: headers}); 
   }
 }

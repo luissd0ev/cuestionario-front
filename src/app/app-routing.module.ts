@@ -6,7 +6,7 @@ const routes: Routes = [
     path: '',
     children: [
       {
-        path: 'preguntas',
+        path: 'preguntas/:id',
         loadChildren: () =>
           import('./cuestionario/cuestionario.module').then(
             (m) => m.TiendaOnlineModule

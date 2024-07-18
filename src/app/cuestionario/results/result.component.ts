@@ -83,7 +83,8 @@ export class ResultComponent implements OnInit {
   }
 
   searchPreguntas() {
-    this.preguntaListService.searchPreguntas().subscribe({
+    ////MODIFICAR AQUI
+    this.preguntaListService.searchPreguntas(1).subscribe({
       next: (response) => {
         ///Asignar valores default a preguntas sin contestaciones
         this.preguntas = response.map((pregunta) => ({

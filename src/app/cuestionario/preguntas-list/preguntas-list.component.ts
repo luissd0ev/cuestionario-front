@@ -14,21 +14,28 @@ interface ValorPonderadoPorPilar {
   styleUrls: ['./preguntas-list.component.css'],
 })
 export class PreguntasListComponent implements OnInit {
+
   preguntas: Pregunta[] = [];
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
-
+  id: number = 0;
   constructor(
     private preguntaListService: PreguntaListService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     
   }
 
   ngOnInit(): void {
     this.loadStateFromLocalStorage();
-    this.searchPreguntas();
+    this.route.params.subscribe(params => {
+      this.id = params['id'];
+      console.log(this.id); // Aquí puedes usar el id para obtener las preguntas
+      this.searchPreguntas(this.id);
+    });
+
   }
 
 
@@ -107,11 +114,22 @@ export class PreguntasListComponent implements OnInit {
           return contestacion.corResId != 0;
         }),
       };
-    });
-    this.preguntaListService.saveUpdateQuestions(preguntasFiltro).subscribe({
+    }); 
+console.log("ENVIANDO AL SIGUIENTE ID");
+console.log(this.id);
+
+
+    this.preguntaListService.saveUpdateQuestions(preguntasFiltro, this.id).subscribe({
       next: (result) => {
-        console.log('Datos guardados con exito.');
+        console.log('Datos guardados con exito.');  
         // alert("Datos guardados con éxito.");
+       
+        if(this.id == 0){
+          console.log(result);
+          this.id = result.result; 
+          this.router.navigate([`/preguntas/${result.result}`]);
+        }
+        this.id = result.result; 
         if (tipoGuardado == 1) {
           this.router.navigate(['/preguntas/result']);
         }
@@ -129,7 +147,7 @@ export class PreguntasListComponent implements OnInit {
       this.pilarActualIndex--;
       this.guardar();
       this.saveStateToLocalStorage();
-      this.searchPreguntas();
+      this.searchPreguntas(this.id);
     }
   }
 
@@ -139,7 +157,7 @@ export class PreguntasListComponent implements OnInit {
       this.pilarActualIndex++;
       this.guardar();
       this.saveStateToLocalStorage();
-      this.searchPreguntas();
+      this.searchPreguntas(this.id);
     }
   }
 
@@ -155,7 +173,9 @@ export class PreguntasListComponent implements OnInit {
     }
   }
 
-
+  nuevaEncuesta() {
+    this.router.navigate(['/preguntas/0']);
+    }
   onRespuestaSeleccionada(pregunta: Pregunta, respuesta: Respuesta): void {
     const getCorId = pregunta.contestaciones[0].corId ?? 0;
 
@@ -297,8 +317,8 @@ export class PreguntasListComponent implements OnInit {
     localStorage.setItem('preguntasState', JSON.stringify(state));
   }
 
-  searchPreguntas() {
-    this.preguntaListService.searchPreguntas().subscribe({
+  searchPreguntas(idContestacion: number) {
+    this.preguntaListService.searchPreguntas(idContestacion).subscribe({
       next: (response) => {
         console.log('Se muestra el resultado de las preguntas');
         console.log(response);
