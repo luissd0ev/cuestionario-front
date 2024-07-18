@@ -18,7 +18,10 @@ export class ResultComponent implements OnInit {
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
-  id: string = ""; 
+  id: string = '';
+
+
+
   constructor(
     private preguntaListService: PreguntaListService,
     private router: Router,
@@ -26,16 +29,16 @@ export class ResultComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.id = this.route.snapshot.paramMap.get('id') ?? "0";
-    console.log("SE MUESTRA EL ID DE ENCUESTA");
+    this.id = this.route.snapshot.paramMap.get('id') ?? '0';
+    console.log('SE MUESTRA EL ID DE ENCUESTA');
     console.log(this.id);
-    
+
     this.searchPreguntas();
   }
 
-  calcularValoresPonderados(): void {
-    
 
+
+  calcularValoresPonderados(): void {
     const preguntasPorPilar: Record<number, Pregunta[]> =
       this.preguntasVisibles.reduce(
         (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
@@ -48,7 +51,6 @@ export class ResultComponent implements OnInit {
         },
         {}
       );
-
 
     this.valoresPonderadosPorPilar = [];
 
@@ -73,9 +75,9 @@ export class ResultComponent implements OnInit {
         valorPonderado: promedioPilar,
       });
     }
-
-
   }
+
+
 
   calcularValorPonderado(pregunta: Pregunta): number {
     const totalValorEvaluacion = pregunta.respuesta
@@ -87,6 +89,8 @@ export class ResultComponent implements OnInit {
     return isNaN(promedioValorPregunta) ? 0 : promedioValorPregunta;
   }
 
+
+  
   searchPreguntas() {
     ////MODIFICAR AQUI
     this.preguntaListService.searchPreguntas(parseInt(this.id, 10)).subscribe({
@@ -108,7 +112,6 @@ export class ResultComponent implements OnInit {
                   },
                 ],
         }));
-
 
         ///Proceso para mostrar las contestaciones
         this.preguntas.forEach((pregunta) => {
@@ -170,10 +173,8 @@ export class ResultComponent implements OnInit {
         preguntasMap.forEach((preguntas) => {
           this.preguntasVisibles.push(...preguntas);
         });
-        console.log("MAPEO ORDENADO");
+        console.log('MAPEO ORDENADO');
         console.log(this.preguntasVisibles);
-        
-        
 
         this.calcularValoresPonderados();
       },
@@ -184,17 +185,16 @@ export class ResultComponent implements OnInit {
     });
   }
 
-
+  
+  
   volver() {
     // Obtener el ID de la encuesta desde los parámetros de la ruta actual
     const idEncuesta = this.route.snapshot.paramMap.get('id');
-  console.log("Enviar");
-  console.log(idEncuesta);
-  console.log(this.route);
-  
-  
+    console.log('Enviar');
+    console.log(idEncuesta);
+    console.log(this.route);
+
     // Navegar de regreso a /preguntas/:idEncuesta
     this.router.navigate(['/preguntas', idEncuesta]);
   }
-
 }

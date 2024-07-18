@@ -20,6 +20,9 @@ export class PreguntasListComponent implements OnInit {
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
   id: number = 0;
+
+
+  
   constructor(
     private preguntaListService: PreguntaListService,
     private router: Router,
@@ -85,9 +88,11 @@ export class PreguntasListComponent implements OnInit {
   }
 
 
+
   direccionar() {
     this.guardar(1);
   }
+
 
 
   desactivarPreguntasHijass(pregunta: Pregunta): void {
