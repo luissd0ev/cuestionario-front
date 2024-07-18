@@ -18,7 +18,7 @@ export class ResultComponent implements OnInit {
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
-
+  id: string = ""; 
   constructor(
     private preguntaListService: PreguntaListService,
     private router: Router,
@@ -26,6 +26,10 @@ export class ResultComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.id = this.route.snapshot.paramMap.get('id') ?? "0";
+    console.log("SE MUESTRA EL ID DE ENCUESTA");
+    console.log(this.id);
+    
     this.searchPreguntas();
   }
 
@@ -85,7 +89,7 @@ export class ResultComponent implements OnInit {
 
   searchPreguntas() {
     ////MODIFICAR AQUI
-    this.preguntaListService.searchPreguntas(1).subscribe({
+    this.preguntaListService.searchPreguntas(parseInt(this.id, 10)).subscribe({
       next: (response) => {
         ///Asignar valores default a preguntas sin contestaciones
         this.preguntas = response.map((pregunta) => ({
