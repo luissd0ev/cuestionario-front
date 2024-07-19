@@ -1,6 +1,6 @@
 <div class="report-container">
   <h3>Reporte de Preguntas</h3>
-  <br>
+  <br />
   <table class="report-table">
     <thead>
       <tr>
@@ -16,14 +16,13 @@
         <td>{{ pregunta.prePilId }}</td>
         <td>{{ pregunta.prePregunta }}</td>
         <td>
-  
           <span *ngFor="let contestacion of pregunta.contestaciones">
             <ng-container *ngIf="contestacion.corValor">
-              <span>{{ contestacion.corValor  }}</span>
+              <span>{{ contestacion.corValor }}</span>
             </ng-container>
           </span>
         </td>
-    
+
         <td>
           <span *ngIf="pregunta.contestaciones.length > 0">
             {{ calcularValorPonderado(pregunta) }}
@@ -33,16 +32,20 @@
     </tbody>
   </table>
 
-  <br>
+  <br />
   <div class="nav-buttons">
-    <button  class="nav-button" (click)="volver()">Volver</button>
+    <button class="nav-button" (click)="volver()">Volver</button>
   </div>
- <br>
+  <br />
 
- <div class="valores-ponderados-container">
-  <h4>Valores Ponderados por Pilar</h4>
-  <div *ngFor="let pilar of valoresPonderadosPorPilar" class="pilar-item">
-    <p>Pilar {{ pilar.prePilId }}: <span class="valor">{{ pilar.valorPonderado }}</span></p>
+  <div class="valores-ponderados-container">
+    <h4>Valores Ponderados por Pilar</h4>
+    <div *ngFor="let pilar of valoresPonderadosPorPilar" class="pilar-item">
+      <p>
+        Pilar {{ pilar.prePilId }}:
+        <span class="valor">{{ pilar.valorPonderado }}</span>
+      </p>
+    </div>
   </div>
-</div>
+  <h3>Pilar final: {{pilarFinal}}</h3>
 </div>

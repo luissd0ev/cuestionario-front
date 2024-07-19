@@ -18,6 +18,7 @@ export class ResultComponent implements OnInit {
   preguntasVisibles: Pregunta[] = [];
   valoresPonderadosPorPilar: ValorPonderadoPorPilar[] = [];
   pilarActualIndex: number = 0;
+  pilarFinal: number = 0; 
   id: string = '';
 
   constructor(
@@ -35,6 +36,7 @@ export class ResultComponent implements OnInit {
   }
 
   calcularValoresPonderados(): void {
+
     const preguntasPorPilar: Record<number, Pregunta[]> =
       this.preguntasVisibles.reduce(
         (acc: Record<number, Pregunta[]>, pregunta: Pregunta) => {
@@ -47,6 +49,7 @@ export class ResultComponent implements OnInit {
         },
         {}
       );
+
     console.log('Preguntas por pilar');
     console.log(preguntasPorPilar);
 
@@ -151,7 +154,7 @@ export class ResultComponent implements OnInit {
     calculoPorcentajePonderado = (100*totalEvaluado)/totalPosibleEvaluar;
     console.log(calculoPorcentajePonderado);
     
-    
+    this.pilarFinal = calculoPorcentajePonderado; 
     
 
 
