@@ -203,3 +203,9 @@ h4 {
 .boton-reporte button{
   background-color: orangered;
 }
+
+.boton-nueva-encuesta{
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: left;
+}

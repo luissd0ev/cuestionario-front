@@ -18,15 +18,18 @@
         <td>
           <span *ngFor="let contestacion of pregunta.contestaciones">
             <ng-container *ngIf="contestacion.corValor">
-              <span>{{ contestacion.corValor }}</span>
+              {{ contestacion.corValor }}  <br>
             </ng-container>
           </span>
         </td>
 
         <td>
-          <span *ngIf="pregunta.contestaciones.length > 0">
-            {{ calcularValorPonderado(pregunta) }}
+          <span *ngFor="let contestacion of pregunta.contestaciones">
+            <ng-container *ngIf="contestacion.corValor">
+              {{ consultarValorContestacion(contestacion) }} <br>
+            </ng-container>
           </span>
+       
         </td>
       </tr>
     </tbody>
@@ -47,5 +50,6 @@
       </p>
     </div>
   </div>
-  <h3>Pilar final: {{pilarFinal}}</h3>
+  <br>
+  <h3>Ponderación final: {{pilarFinal}}</h3>
 </div>
