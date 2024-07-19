@@ -54,16 +54,17 @@ export class ResultComponent implements OnInit {
     
     let totalPosibleEvaluar = 0;
     let totalEvaluado = 0; 
+    let totalEvaluadoPilar = 0; 
     let calculoPorcentajePonderado = 0; 
     for (const prePilId in preguntasPorPilar) {
         const preguntas = preguntasPorPilar[prePilId];
         let totalPosiblePreguntasAbiertas = 0;
         let totalPosiblePreguntasMultiple = 0;
         let totalPosiblePreguntasCerradas = 0;
-    
+        totalEvaluadoPilar = 0; 
         console.log('Preguntas');
         console.log(preguntas);
-    
+  
         preguntas.forEach((pregunta) => {
             if (pregunta.preTipId == 3) {
                 console.log('Pregunta abierta');
@@ -74,6 +75,7 @@ export class ResultComponent implements OnInit {
                     ? 1
                     : 0;
                     totalEvaluado += valorPreguntaAbierta; 
+                    totalEvaluadoPilar += valorPreguntaAbierta; 
                 }
                
                 totalPosiblePreguntasAbiertas++;
@@ -102,6 +104,7 @@ export class ResultComponent implements OnInit {
                     console.log(valorRespuestaActual);
                     totalPosiblePreguntasCerradas += valorMaximo;
                     totalEvaluado += valorRespuestaActual; 
+                    totalEvaluadoPilar += valorRespuestaActual; 
                 });
             } else if (pregunta.preTipId == 5) {
                 console.log('Preguntas de seleccion multiple');
@@ -117,6 +120,7 @@ export class ResultComponent implements OnInit {
                   console.log(valorRespuesta);
                   
                   totalEvaluado += valorRespuesta; 
+                  totalEvaluadoPilar += valorRespuesta; 
                 });
                 
                 totalPosiblePreguntasMultiple += valorRespuestaActual;
@@ -130,7 +134,10 @@ export class ResultComponent implements OnInit {
         console.log(totalPosiblePorPilar);
         
         totalPosibleEvaluar += totalPosiblePorPilar; 
-    
+        this.valoresPonderadosPorPilar.push({
+          prePilId: Number(prePilId),
+          valorPonderado: (totalEvaluadoPilar*100)/totalPosiblePorPilar,
+        });
         console.log('PILAR ACTUAL');
         console.log(prePilId);
     }
@@ -147,80 +154,7 @@ export class ResultComponent implements OnInit {
     
     
 
-    for (const prePilId in preguntasPorPilar) {
-      const preguntas = preguntasPorPilar[prePilId];
 
-      let totalValorEvaluacion = 0;
-      let totalPosibleValor = 0;
-
-      preguntas.forEach((pregunta) => {
-        if (pregunta.preTipId === 3) {
-          // Preguntas abiertas
-          const valorPregunta = pregunta.respuesta.some(
-            (res) => res.resValor.trim() !== ''
-          )
-            ? 1
-            : 0;
-
-          const valorPreguntaDos = pregunta.contestaciones.some(
-            (contestacion) => contestacion.corValor !== ''
-          )
-            ? 1
-            : 0;
-
-          totalValorEvaluacion += valorPreguntaDos;
-          totalPosibleValor += 1;
-        } else if (pregunta.preTipId === 4) {
-          // Preguntas de selección única
-          const totalValorPregunta = pregunta.respuesta
-            .filter((res) => res.seleccionado)
-            .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-
-          const totalValorPreguntaDos = pregunta.respuesta
-            .filter((res) =>
-              pregunta.contestaciones.some(
-                (contestacion) => contestacion.corPreId == pregunta.preId
-              )
-            )
-            .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-
-          // console.log("VALOR DE LA SUMA DE SELECCION UNICA");
-          // console.log(totalValorPreguntaDos);
-
-          const promedioValorPregunta =
-            totalValorPregunta /
-            pregunta.respuesta.filter((res) => res.seleccionado).length;
-          totalValorEvaluacion += isNaN(promedioValorPregunta)
-            ? 0
-            : promedioValorPregunta;
-
-          // Asumimos que el total posible es la suma de todos los valores de evaluación
-          totalPosibleValor += pregunta.respuesta.reduce(
-            (sum, res) => sum + res.resValorEvaluacion,
-            0
-          );
-        } else if (pregunta.preTipId === 5) {
-          // Preguntas de selección múltiple
-          const totalValorPregunta = pregunta.respuesta
-            .filter((res) => res.seleccionado)
-            .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
-          totalValorEvaluacion += totalValorPregunta;
-
-          // Asumimos que el total posible es la suma de todos los valores de evaluación
-          totalPosibleValor += pregunta.respuesta.reduce(
-            (sum, res) => sum + res.resValorEvaluacion,
-            0
-          );
-        }
-      });
-
-      const porcentajePilar = (totalValorEvaluacion / totalPosibleValor) * 100;
-
-      this.valoresPonderadosPorPilar.push({
-        prePilId: Number(prePilId),
-        valorPonderado: porcentajePilar,
-      });
-    }
 
     console.log(this.valoresPonderadosPorPilar);
   }
