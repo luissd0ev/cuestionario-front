@@ -51,82 +51,101 @@ export class ResultComponent implements OnInit {
     console.log(preguntasPorPilar);
 
     this.valoresPonderadosPorPilar = [];
-
+    
     let totalPosibleEvaluar = 0;
-    let totalPosiblePreguntasAbiertas = 0;
-    let totalPosiblePreguntasMultiple = 0;
-    let totalPosiblePreguntasCerradas = 0;
-
+    let totalEvaluado = 0; 
+    let calculoPorcentajePonderado = 0; 
     for (const prePilId in preguntasPorPilar) {
-      const preguntas = preguntasPorPilar[prePilId];
-      let totalPosiblePorPilar = 0;
-      totalPosiblePreguntasCerradas = 0;
-      totalPosiblePreguntasAbiertas = 0;
-      totalPosiblePreguntasMultiple = 0;
-      console.log('Preguntas');
-      console.log(preguntas);
-      preguntas.forEach((pregunta) => {
-        if (pregunta.preTipId == 3) {
-          console.log('Pregunta abierta');
+        const preguntas = preguntasPorPilar[prePilId];
+        let totalPosiblePreguntasAbiertas = 0;
+        let totalPosiblePreguntasMultiple = 0;
+        let totalPosiblePreguntasCerradas = 0;
+    
+        console.log('Preguntas');
+        console.log(preguntas);
+    
+        preguntas.forEach((pregunta) => {
+            if (pregunta.preTipId == 3) {
+                console.log('Pregunta abierta');
+                if(pregunta.contestaciones){
+                  const valorPreguntaAbierta = pregunta.contestaciones.some(
+                    (contestacion) => contestacion.corValor !== ''
+                  )
+                    ? 1
+                    : 0;
+                    totalEvaluado += valorPreguntaAbierta; 
+                }
+               
+                totalPosiblePreguntasAbiertas++;
+            } else if (pregunta.preTipId == 4) {
+                console.log('----------Preguntas de seleccion unicas----');
+                pregunta.contestaciones.forEach((contestacion) => {
+                    const valorRespuestaActual = pregunta.respuesta
+                        .filter((respuesta) => (
+                            respuesta.resPreId == contestacion.corPreId &&
+                            contestacion.corResId == respuesta.resId
+                        ))
+                        .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+                pregunta.respuesta.forEach((respuesta)=>{
+                  return respuesta.resValor
+                })
 
-          totalPosiblePreguntasAbiertas++;
-        } else if (pregunta.preTipId == 4) {
-          console.log('----------Preguntas de seleccion unicas----');
-          pregunta.contestaciones.forEach((contestacion) => {
-            const valorRespuestaActual = pregunta.respuesta
-              .filter((respuesta) => {
-                return (
-                  respuesta.resPreId == contestacion.corPreId &&
-                  contestacion.corResId == respuesta.resId
-                );
-              })
-              .reduce((sum, respuesta) => {
-                return sum + respuesta.resValorEvaluacion;
-              }, 0);
-            console.log('respuestas de selección unica');
-            console.log('Pilar ', prePilId);
-
-            console.log(valorRespuestaActual);
-
-            totalPosiblePreguntasCerradas += valorRespuestaActual;
-          });
-        } else if (pregunta.preTipId == 5) {
-          console.log('Preguntas de seleccion multiple');
-
-          const valorRespuestaActual = pregunta.respuesta.reduce(
-            (sum, respuesta) => {
-              return sum + respuesta.resValorEvaluacion;
-            },
-            0
-          );
-          totalPosiblePreguntasMultiple += valorRespuestaActual;
-        }
-        // console.log("Total posibble pregunta cerrada:::::");
-        // console.log(totalPosiblePreguntasCerradas);
-        // console.log("Total posible pregunta multiple:::::");
-        // console.log(totalPosiblePreguntasMultiple);
-        // console.log("Total posible preguntas abiertas");
-        // console.log(totalPosiblePreguntasAbiertas);
-
-        totalPosiblePorPilar =
-          totalPosiblePreguntasMultiple +
-          totalPosiblePreguntasAbiertas +
-          totalPosiblePreguntasCerradas;
-
+                const valorMaximo = pregunta.respuesta.reduce((max, respuesta) => {
+                  return respuesta.resValorEvaluacion > max ? respuesta.resValorEvaluacion : max;
+                }, 0);
+                console.log("VALOR MAXIMO DE GRUPO DE PREGUNTAS::::::------------>>>>>>>>>");
+                console.log(valorMaximo);
+                
+                
+                    console.log('respuestas de selección unica');
+                    console.log('Pilar ', prePilId);
+                    console.log(valorRespuestaActual);
+                    totalPosiblePreguntasCerradas += valorMaximo;
+                    totalEvaluado += valorRespuestaActual; 
+                });
+            } else if (pregunta.preTipId == 5) {
+                console.log('Preguntas de seleccion multiple');
+                const valorRespuestaActual = pregunta.respuesta.reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+                pregunta.contestaciones.forEach((contestacion)=>{
+                  const valorRespuesta = pregunta.respuesta
+                  .filter((respuesta) => (
+                      respuesta.resPreId == contestacion.corPreId &&
+                      contestacion.corResId == respuesta.resId
+                  ))  
+                  .reduce((sum, respuesta) => sum + respuesta.resValorEvaluacion, 0);
+                  console.log("VALOR EVALUADO SELECCION MULTIPLE-----------------------");
+                  console.log(valorRespuesta);
+                  
+                  totalEvaluado += valorRespuesta; 
+                });
+                
+                totalPosiblePreguntasMultiple += valorRespuestaActual;
+            }
+        });
+    
+        const totalPosiblePorPilar = totalPosiblePreguntasMultiple + totalPosiblePreguntasAbiertas + totalPosiblePreguntasCerradas;
         
-      });
-
-      console.log(
-        '----------------------------Total posible por pilar---------------------------------'
-      );
-      console.log('VALOR FINAL');
-      console.log(totalPosiblePorPilar);
-      totalPosibleEvaluar += totalPosiblePorPilar; 
-      console.log('PILAR ACTUAL');
-      console.log(prePilId);
+        console.log('----------------------------Total posible por pilar---------------------------------');
+        console.log('VALOR FINAL');
+        console.log(totalPosiblePorPilar);
+        
+        totalPosibleEvaluar += totalPosiblePorPilar; 
+    
+        console.log('PILAR ACTUAL');
+        console.log(prePilId);
     }
+    
     console.log('Resultado de suma posible: ');
     console.log(totalPosibleEvaluar);
+    console.log("Resultado total evaluado: ");
+    console.log(totalEvaluado);
+
+    console.log("Calculo de porcentaje ponderado: ");
+    calculoPorcentajePonderado = (100*totalEvaluado)/totalPosibleEvaluar;
+    console.log(calculoPorcentajePonderado);
+    
+    
+    
 
     for (const prePilId in preguntasPorPilar) {
       const preguntas = preguntasPorPilar[prePilId];
